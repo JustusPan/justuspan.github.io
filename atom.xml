@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://justuspan.github.io/"/>
-  <updated>2017-09-03T05:23:56.329Z</updated>
+  <updated>2017-09-03T05:35:04.654Z</updated>
   <id>http://justuspan.github.io/</id>
   
   <author>
@@ -16,9 +16,29 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title></title>
+    <link href="http://justuspan.github.io/cj74azljy0001f6oi0ec37axh/"/>
+    <id>http://justuspan.github.io/cj74azljy0001f6oi0ec37axh/</id>
+    <published>2017-09-03T05:35:04.658Z</published>
+    <updated>2017-09-03T05:35:04.654Z</updated>
+    
+    <content type="html"><![CDATA[<p>如果把前缀删光之后会怎么样</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;如果把前缀删光之后会怎么样&lt;/p&gt;
+
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
     <title>第一篇测试文</title>
-    <link href="http://justuspan.github.io/2017/09/03/%E7%AC%AC%E4%B8%80%E7%AF%87%E6%B5%8B%E8%AF%95%E6%96%87/"/>
-    <id>http://justuspan.github.io/2017/09/03/第一篇测试文/</id>
+    <link href="http://justuspan.github.io/cj74azlk00002f6oi7uky91uy/"/>
+    <id>http://justuspan.github.io/cj74azlk00002f6oi7uky91uy/</id>
     <published>2017-09-03T05:23:22.000Z</published>
     <updated>2017-09-03T05:23:56.329Z</updated>
     
@@ -37,8 +57,8 @@
   
   <entry>
     <title>Hello World</title>
-    <link href="http://justuspan.github.io/2017/09/03/hello-world/"/>
-    <id>http://justuspan.github.io/2017/09/03/hello-world/</id>
+    <link href="http://justuspan.github.io/cj74azljv0000f6oitcnjqpdk/"/>
+    <id>http://justuspan.github.io/cj74azljv0000f6oitcnjqpdk/</id>
     <published>2017-09-02T23:50:21.941Z</published>
     <updated>2017-09-02T23:50:21.941Z</updated>
     
