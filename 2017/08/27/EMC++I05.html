@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Item 5: Prefer auto to explicit type declarations.</title>
+  <meta name="description" content="Sunday, 27. August 2017 03:02PM #Item 5: Prefer auto to explicit type declarations.#条目5：宁愿使用 auto 替代 explicit type declarations(显式类型声明)">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://jtpan.me/2017/08/27/EMC++I05.html">
+  <link rel="alternate" type="application/rss+xml" title="Jtpan World" href="http://jtpan.me/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Jtpan World</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Item 5: Prefer auto to explicit type declarations.</h1>
+    <p class="post-meta"><time datetime="2017-08-27T23:02:00+08:00" itemprop="datePublished">Aug 27, 2017</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">Jtpan</span></span></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>Sunday, 27. August 2017 03:02PM <br />
+#Item 5: Prefer auto to explicit type declarations.<br />
+#条目5：宁愿使用 auto 替代 explicit type declarations(显式类型声明)</p>
+
+<p>##术语&amp;概念</p>
+
+<ul>
+  <li>###<strong>explicit type declaration</strong></li>
+</ul>
+
+<p>用具体类型声明的方式</p>
+
+<p>Example<br />
+~~~<br />
+int x;<br />
+~~~</p>
+
+<ul>
+  <li>###<strong>auto声明法</strong><br />
+~~~<br />
+auto x3 = 0;<br />
+~~~</li>
+</ul>
+
+<p>##快速笔记</p>
+
+<ol>
+  <li>
+    <p>三个不用auto就感到有点困扰的使用小场景，用auto神清气爽。而且，C++14中lambda的形参也可以包含auto了,更加方便。</p>
+
+    <ul>
+      <li>只声明却忘了初始化</li>
+      <li>Iterator所指的对象的类型声明</li>
+      <li>声明闭包(closure)的类型</li>
+    </ul>
+  </li>
+  <li>
+    <p>指定闭包类型的话，用std::function对象也可以。但是这个方法通常会比auto占用空间更多，速度更慢。</p>
+
+    <ul>
+      <li>std::function 语法冗长，需要重复的类型声明</li>
+      <li>std::function 通常比 closure　要大。拥有固定大小，再在heap中分配内存来保存额外数据。可能抛出out-of-memory 异常(exception).</li>
+      <li>归因于限制inline的实现细节和产生的间接函数调用(indirect function call), 调用一个std::function对象比调用一个auto声明的对象，几乎必然要慢。</li>
+    </ul>
+  </li>
+  <li>除了上述优点，auto还能避免”type shortcuts”问题。两个例子
+    <ul>
+      <li><code>std::vector&lt;int&gt;::size_type</code></li>
+      <li><code>std::pair&lt;const std::string,int&gt;</code></li>
+    </ul>
+  </li>
+  <li>
+    <p>如果在你的专业判断下，觉得自己的代码用显式类型声明更清晰更加可维护，那可以继续这样使用。但是要记住：在采纳编程语言世界中被广泛知晓的类型推断(type inference)时，C++并没有开辟新的战场。得益于动态类型语言(Perl, Python, Ruby)的成功,　在类型推断被开发社区广泛体验以后，可以说这个技术与创造维护大规模，工业强度的代码基底没有冲突。</p>
+  </li>
+  <li>关于”瞄一眼”的快速可读性下降的担忧
+    <ul>
+      <li>有IDE可以查看类型</li>
+      <li>很多情况下更加抽象的类型认知和确切的类型一样有用。对于这种只需要知道抽象类型的情况，精良选择的变量名称也可以提供这些信息。</li>
+    </ul>
+  </li>
+  <li>auto可以减少微妙的错误，提高正确性和效率。而且重构的时候比较方便。</li>
+</ol>
+
+<p>##例子　</p>
+
+<p>==Example 1==</p>
+
+<pre><code>int x;
+</code></pre>
+<p>忘记初始化</p>
+
+<pre><code>template&lt;typename It&gt;		// algorithm to dwim ("do what I mean")
+void dwim(It b, It e)		// for all elements in range from
+{							// b to e
+  for (; b != e; ++b) {
+    typename std::iterator_traits&lt;It&gt;::value_type
+    currValue = *b;
+    ...
+  }
+}
+</code></pre>
+<p>类型名字太长</p>
+
+<p>上述两种情况用auto就轻松解决，比如<br />
+~~~<br />
+int x1;  //potentially uninitialized</p>
+
+<p>auto x2; //error! initializer required</p>
+
+<p>auto x3 = 0;  //fine, x3’s value is well-defined</p>
+
+<p>template<typename it="">  //as before
+void dwim(It b, It e)
+{
+  for (; b != e; ++b) {
+    auto currValue = *b;
+    ...
+  }
+}
+~~~</typename></p>
+
+<p>再来看看闭包的情况<br />
+C++11中<br />
+~~~<br />
+auto derefUPless = <br />
+  <a href="const std::unique_ptr&lt;Widget&gt;&amp; p1,
+     const std::unique_ptr&lt;Widget&gt;&amp; p2"></a><br />
+  { return *p1 &lt; *p2; };<br />
+~~~</p>
+
+<p>C++14中<br />
+~~~<br />
+auto derefLess =<br />
+  <a href="const auto&amp; p1,
+     const auto&amp; p2"></a><br />
+  { return *p1 &lt; *p2; };<br />
+~~~</p>
+
+<p>==Example 2==<br />
+如果说std::function所指的callable object有如下的签名式(signature)<br />
+~~~<br />
+bool(const std::unique_ptr<widget>&amp;,
+     const std::unique_ptr<widget>&amp;)
+~~~
+那么你就需要如下的声明
+~~~
+std::function&lt;bool(const std::unique_ptr<widget>&amp;,
+                   const std::unique_ptr<widget>&amp;)&gt; func;
+~~~
+也就是说在C++11中我们不借助auto也可以用如下语句声明这个derefUPLess,
+~~~
+std::function&lt;bool(const std::unique_ptr<widget>&amp;,
+                   const std::unique_ptr<widget>&amp;)&gt;
+derefUPLess = [](const std::unique_ptr<widget>&amp; p1,
+                 const std::unique_ptr<widget>&amp; p2)
+                { return *p1 &lt; *p2; };
+~~~</widget></widget></widget></widget></widget></widget></widget></widget></p>
+
+<p>==Example 3==<br />
+~~~<br />
+std::vector<int>v;
+...
+unsigned sz = v.size();
+~~~
+v.size()的官方返回类型是`std::vector<int>::size_type`,　但是很少开发者意识到这是unsigned integral类型。很多开发者认为这里使用unsigned已经足够好了。在32位系统中他们有同样的大小。但是在64位系统中，unsigned是32位的，但是`std::vector<int>::size_type`是64位的.这会带来一些移植问题。
+使用auto的话就不用理会这些问题了
+~~~
+auto sz = v.size();  //sz's type is std::vector<int>::size_type
+~~~</int></int></int></int></p>
+
+<p>再来考虑另一个例子<br />
+~~~<br />
+std::unordered_map&lt;std::string, int&gt; m;<br />
+…</p>
+
+<p>for (const std::pair&lt;std::string, int&gt;&amp; p : m)<br />
+{<br />
+  …  //do something with p<br />
+}<br />
+~~~<br />
+这里看起来很完美，理据服。但是事实上存在一个问题，你发现了么？<br />
+出差错的地方在于我们要知道容器<code>std::unordered_map</code>的key部分是const, 所以这个哈希表(hash tabel)中的<code>std::pair</code>的类型不是<code>std::pair&lt;std::string,int&gt;</code>,而是<code>std::pair&lt;const std::string,int&gt;</code>. 上面这样写的结果就是使得编译器力求找到办法将哈希表中的<code>std::pair&lt;const std::string,int&gt;</code>对象转换为<code>std::pair&lt;std::string,int&gt;</code>对象。它们将对哈希表中的每一个对象进行复制创建出临时对象，并且将引用p绑定在上面，从而成功做到转换。<br />
+然后你就会对对这段代码的效率感到惊讶，因为你本来几乎很确定地只想把引用p绑定到表中的每个对象上去。</p>
+
+<p>像这样的无意识的类型错配能够用auto避免，就像下面这样<br />
+~~~<br />
+for (const auto&amp; p : m) {<br />
+  …  // as before<br />
+}<br />
+~~~</p>
+
+<p>##谨记要点<br />
+- auto变量必须初始化。普遍免疫那些会引发移植性和效率问题的类型错配。简化重构(refactoring)过程。通常比显式指定类型需要更少的键盘键入。<br />
+- 被auto自动推导类型的变量受制于一些陷阱，这些内容将在Item 2和 Item 6描述。</p>
+
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li><a href="mailto:panjingtian@126.com">panjingtian@126.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/justuspan"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">justuspan</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Copyright &copy 2017 Jtpan. All rights reserved.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

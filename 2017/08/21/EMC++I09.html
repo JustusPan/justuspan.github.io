@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Item 9: Prefer alias declarations to typedefs.</title>
+  <meta name="description" content="Sunday, 20. August 2017 05:44PM# Item 9: Prefer alias declarations to typedefs.# 条目9：宁愿使用alias declararion 替代 typedef">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://jtpan.me/2017/08/21/EMC++I09.html">
+  <link rel="alternate" type="application/rss+xml" title="Jtpan World" href="http://jtpan.me/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Jtpan World</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Item 9: Prefer alias declarations to typedefs.</h1>
+    <p class="post-meta"><time datetime="2017-08-21T01:44:00+08:00" itemprop="datePublished">Aug 21, 2017</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">Jtpan</span></span></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>Sunday, 20. August 2017 05:44PM<br />
+# Item 9: Prefer alias declarations to typedefs.<br />
+# 条目9：宁愿使用alias declararion 替代 typedef</p>
+
+<h2 id="section">术语&amp;概念：</h2>
+<ul>
+  <li>
+    <h3 id="typedef"><strong>typedef</strong></h3>
+  </li>
+</ul>
+
+<p>Example<br />
+~~~c++<br />
+typedef std::unique_ptr&lt;std::unordered_map&lt;std::string, std::string» UPtrMapSS;<br />
+~~~</p>
+
+<ul>
+  <li>
+    <h3 id="alias-declaration"><strong>alias declaration</strong></h3>
+  </li>
+</ul>
+
+<p>Example<br />
+~~~c++<br />
+using UPtrMapSS = std:unique_ptr&lt;std::unordered_map&lt;std::string, std::string»;<br />
+~~~<br />
+## 快速笔记：<br />
+### 至少有两种理由这样做，其中一种属于个人喜好的问题，另一种令人信服<br />
+1. 当处理函数指针的时候，<strong>alias declaration</strong> 形式更加自然可读<br />
+2.  <strong>alias declaration</strong> 特殊的地方在于它可以被模板化，但是<strong>typedef</strong>不能。</p>
+
+<p>==Example 1==<br />
+~~~c++<br />
+typedef void (*FP)(int, const std::string&amp;); //typedef</p>
+
+<p>using FP = void (*)(int, const std::string&amp;); //alias declaration<br />
+~~~</p>
+
+<p>==Example 2==</p>
+
+<p>考虑为拥有自定义分配器(allocator)的链表定义一个同名。注意这里的自定义分配器名为MyAlloc。Widget这里表示某一个用户定义的类。<br />
+以下是<strong>alias declaration</strong>的用法<br />
+~~~c++<br />
+template<typenam t="">
+using MyAllocList = std::list&lt;T, MyAlloc<t>&gt;;</t></typenam></p>
+
+<p>MyAllocList<widget> lw; //client code
+~~~
+想要使用**typedef**达到类似的效果就需要写成如下的样子
+~~~c++
+template<typenamef t="">
+struct MyAllocList {
+  typedef std::list&lt;T,MyAlloc<t>&gt; type;
+};</t></typenamef></widget></p>
+
+<p>MyAllocList<widget>::type lw; //client code
+~~~
+继续，当我们希望将上述那样一个链表用作某个模板类的成员时，事情会变得更加糟糕，
+实现将会是下面这个样子
+~~~c++
+template<typename t="">
+class Widget {
+private:
+  typename MyAllocList<t>::type list;
+};
+~~~
+注意到这里的type是一个有依赖的类型(dependent type), 如果某个模板中的类型声明中包含了模板参数T我们一般称呼这是个dependent type,这种类型之前一定要写上typename编译才能知道这里表达的是一个类型而不是别的什么东西, typename的这种用法请参考EC++。这里作简单说明。
+为什么这里的type叫做有依赖的类型呢,因为他具体是什么东西取决于依赖于T到底是什么。这个现象实质上是由模板的特化(specialization)引起的。
+考虑这样的情况，假设我们的MyAllocList存在如下的特化
+~~~c++
+class Wine { ... }
+template&lt;&gt;
+class MyAllocList<wine> {
+private:
+  enum class WineType
+  { White, Red, Rose };</wine></t></typename></widget></p>
+
+<p>WineType type; //in this class, type is a data member!<br />
+  …<br />
+};<br />
+~~~<br />
+可以看到这种情况下type并不表示为一个类型。正是有这样的原因存在,当定义一个模板时, 所有在声明形式中嵌入了模板参数T的类型声明前必须加入typename修饰词以显式地告诉编译器这是个类型,然后编译器才能正常工作。</p>
+
+<p>然后我们来看看<strong>alias declaration</strong>在这种使用场景下的例子<br />
+~~~c++<br />
+template<typename t="">
+using MyAllocList = std::list&lt;T, MyAlloc<t>&gt;; //as before</t></typename></p>
+
+<p>template<typename t="">
+class Widget {
+private:
+  MyAllocList<t> list; //no "typename", no "::type"
+  ...
+};
+~~~
+这里编译器在看到MyAllocList就已经清楚得知道它是个同名模板，必定表达的是个类型。清晰明了。</t></typename></p>
+
+<h3 id="section-1">额外的例子</h3>
+<p>当我们在进行模板元编程时(template metaprogramming, TMP), 一定会有改变模板形参T的类型的需求，比如去除const-或是reference-修饰词，或者是增加const-或是使其转变为左值引用(lvalue reference)。<br />
+C++11在头文件<type_traits>中提供了一组模板工具来完成这些功能。它们都拥有
+~~~c++
+std::transformation<t>::type
+~~~
+这样的形式。</t></type_traits></p>
+
+<p>==Example==<br />
+~~~c++<br />
+std::remove_const<t>::type  // yields T from const T
+std::remove_reference<t>::type // yields T from T&amp; and T&amp;&amp;
+std::add_lvalue_reference<t>::type // yields T&amp; from T
+~~~
+没错，由于一些历史原因，以上实现全部基于typedef。同样的功能，在C++14中提供了另一组形式为
+~~~c++
+std::transformation_t<t>
+~~~
+的实现。例子如下
+~~~c++
+std::remove_const<t>::type // C++11: const T -&gt; T
+std::remove_const_t<t>	// C++14 equivalent</t></t></t></t></t></t></p>
+
+<p>std::remove_reference<t>::type // C++11: T&amp;/T&amp;&amp; -&gt; T
+std::remove_reference_t<t>  // C++14 equivalent</t></t></p>
+
+<p>std::add_lvalue_reference<t>::type // C++11: T -&gt; T&amp;
+std::add_lvalue_reference_t<t>	// C++14 equivalent
+~~~
+以下是C++14标准实现，即使当我们只能使用C++11，我们也可以很容易复制粘贴这样的实现。
+~~~c++
+template <class t="">
+using remove_const_t = typename remove_const<t>::type;</t></class></t></t></p>
+
+<p>template <class t="">
+using remove_reference_t = typename remove_reference<t>::type;</t></class></p>
+
+<p>template <class t="">
+using add_lvalue_reference_t = typename add_lvalue_reference<t>::type;
+~~~
+看，不能更简单了。</t></class></p>
+
+<h2 id="section-2">谨记要点</h2>
+<ul>
+  <li>typedef不支持模板化，alias declaration支持。</li>
+  <li>在模板中作类型声明时，alias declaration可以避免那些typedef总是需要的”::type”和”typename”</li>
+  <li>C++11提供了类型特性(type traits)转化, C++14兼容前者的基础上又提供了所有的基于alias declaration实现的版本。</li>
+</ul>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li><a href="mailto:panjingtian@126.com">panjingtian@126.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/justuspan"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">justuspan</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Copyright &copy 2017 Jtpan. All rights reserved.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

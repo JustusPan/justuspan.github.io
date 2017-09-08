@@ -6,12 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Jtpan World</title>
-  <meta name="description" content="Copyright &copy 2017 Jtpan. All rights reserved.
-">
+  <title>Piecewise Construction</title>
+  <meta name="description" content="Sunday, 27. August 2017 07:42AM #Piecewise Construction 逐块式构造">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://jtpan.me/">
+  <link rel="canonical" href="http://jtpan.me/2017/08/27/piecewise-construction.html">
   <link rel="alternate" type="application/rss+xml" title="Jtpan World" href="http://jtpan.me/feed.xml">
 </head>
 
@@ -55,75 +54,66 @@
 
     <div class="page-content">
       <div class="wrapper">
-        <div class="home">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
-  <h1 class="page-heading">Posts</h1>
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Piecewise Construction</h1>
+    <p class="post-meta"><time datetime="2017-08-27T15:42:00+08:00" itemprop="datePublished">Aug 27, 2017</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">Jtpan</span></span></p>
+  </header>
 
-  <ul class="post-list">
-    
-      <li>
-        <nobr>
-        Sep 3, 2017 <a class="post-link" href="/2017/09/03/EMC++I07.html">Item 7: Distinguish between () and {} when creating objects.</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 28, 2017 <a class="post-link" href="/2017/08/28/EMC++I06.html">Item 6: Use the explicitly typed initializer idiom when auto deduces undersired types</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/closure-lambda-expression.html">Closure and Lambda Expression</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/EMC++I05.html">Item 5: Prefer auto to explicit type declarations.</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/tuple-comparison.html">Tuple Comparison</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/pair-comparison.html">Pair Comparison</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/piecewise-construction.html">Piecewise Construction</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/callable-object.html">Callable Object</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 22, 2017 <a class="post-link" href="/2017/08/22/EMC++I03.html">Item 3: Understand decltype</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 21, 2017 <a class="post-link" href="/2017/08/21/EMC++I09.html">Item 9: Prefer alias declarations to typedefs.</a>
-        </nobr>
-      </li>
-    
-  </ul>
+  <div class="post-content" itemprop="articleBody">
+    <p>Sunday, 27. August 2017 07:42AM <br />
+#Piecewise Construction 逐块式构造</p>
 
-</div>
+<p>Class pair&lt;&gt; 提供三个构造函数，用以初始化first和second<br />
+~~~<br />
+namespace std {<br />
+    template &lt;typename T1, typename T2&gt;<br />
+    stuct pair {<br />
+        …<br />
+        pair(const T1&amp; x, const T2&amp; y);<br />
+        template&lt;typename U, typename V&gt; pair(U&amp;&amp; x, V&amp;&amp; y);<br />
+        template&lt;typename… Args1, typename… Args&gt;<br />
+        pair(piecewise_construct_t, tuple<args1...> first_args, tuple<args2...> second_args);
+        ...
+    };
+}
+~~~
+第三个构造函数传递使用两个tuple分别将其元素传递first和second的构造函数去构造实例。为了强迫执行这样的行为， 你必须传递std::piecewise_construct作为额外的第一实参。
+==Example==
+~~~
+// util/pair1.cpp</args2...></args1...></p>
+
+<p>#include <iostream>
+#include <utility>
+#include <tuple>
+using namespace std;</tuple></utility></iostream></p>
+
+<p>class Foo {<br />
+  public:<br />
+    Foo (tuple&lt;int,float&gt;) {<br />
+      cout«“Foo::Foo(tuple)”«endl;<br />
+    }<br />
+    template <typename... args="">
+    Foo (Args... args) {
+      cout&lt;&lt;"Foo::Foo(args...)"&lt;&lt;endl;
+    }
+};</typename...></p>
+
+<p>int main() {<br />
+    //create tuple t;<br />
+    tuple&lt;int,float&gt; t(1, 2.22);</p>
+
+<pre><code>//pass the tuple as a whole to the constructor of Foo:
+pair&lt;int, Foo&gt; p1(42,t);
+
+//pass the elements of tuple to the constructor of Foo;
+pair&lt;int,Foo&gt; p2 (piecewise_construct, make_tuple(42), t); } ~~~ 这个程序有以下输出 ~~~ Foo::Foo(tuple) Foo::Foo(args...) ~~~
+</code></pre>
+
+  </div>
+
+</article>
 
       </div>
     </div>

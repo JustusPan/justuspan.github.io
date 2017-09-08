@@ -6,12 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Jtpan World</title>
-  <meta name="description" content="Copyright &copy 2017 Jtpan. All rights reserved.
-">
+  <title>Callable Object</title>
+  <meta name="description" content="Saturday, 26. August 2017 08:40PM #Callable Objecgt(可被调用的对象)Callable Object可以是">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://jtpan.me/">
+  <link rel="canonical" href="http://jtpan.me/2017/08/27/callable-object.html">
   <link rel="alternate" type="application/rss+xml" title="Jtpan World" href="http://jtpan.me/feed.xml">
 </head>
 
@@ -55,75 +54,64 @@
 
     <div class="page-content">
       <div class="wrapper">
-        <div class="home">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
-  <h1 class="page-heading">Posts</h1>
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Callable Object</h1>
+    <p class="post-meta"><time datetime="2017-08-27T04:40:00+08:00" itemprop="datePublished">Aug 27, 2017</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">Jtpan</span></span></p>
+  </header>
 
-  <ul class="post-list">
-    
-      <li>
-        <nobr>
-        Sep 3, 2017 <a class="post-link" href="/2017/09/03/EMC++I07.html">Item 7: Distinguish between () and {} when creating objects.</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 28, 2017 <a class="post-link" href="/2017/08/28/EMC++I06.html">Item 6: Use the explicitly typed initializer idiom when auto deduces undersired types</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/closure-lambda-expression.html">Closure and Lambda Expression</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/EMC++I05.html">Item 5: Prefer auto to explicit type declarations.</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/tuple-comparison.html">Tuple Comparison</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/pair-comparison.html">Pair Comparison</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/piecewise-construction.html">Piecewise Construction</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/callable-object.html">Callable Object</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 22, 2017 <a class="post-link" href="/2017/08/22/EMC++I03.html">Item 3: Understand decltype</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 21, 2017 <a class="post-link" href="/2017/08/21/EMC++I09.html">Item 9: Prefer alias declarations to typedefs.</a>
-        </nobr>
-      </li>
-    
-  </ul>
+  <div class="post-content" itemprop="articleBody">
+    <p>Saturday, 26. August 2017 08:40PM <br />
+#Callable Objecgt(可被调用的对象)<br />
+Callable Object可以是</p>
 
-</div>
+<ul>
+  <li>函数</li>
+  <li>指向成员函数的指针</li>
+  <li>函数对象</li>
+  <li>lambda,严格来说也是函数对象</li>
+</ul>
+
+<p>Example:<br />
+~~~<br />
+void func (int x, int y);</p>
+
+<p>auto l = [] () {<br />
+          …<br />
+	};</p>
+
+<p>class C {<br />
+  public:<br />
+    void operator () (int x, int y) const;<br />
+    void memfunc (int x, int y) const;<br />
+};</p>
+
+<p>int main() <br />
+{<br />
+    C c;<br />
+    std::shared_ptr<c> sp(new C);</c></p>
+
+<pre><code>//bind() uses callable objects to bind arguments:
+std::bind(func,77,33)();
+std::bind(l,77,33)();
+std::bind(C(),77,33)();
+std::bind(&amp;C::memfunc,c,77,33)();
+std::bind(&amp;C::memfunc,sp,77,33)();
+
+//async() uses callable objects to start(background) tasks:
+std::async(func,42,77);
+std::async(l,42,77);
+std::async(c,42,77);
+std::async(&amp;C::memfunc,&amp;c,42,77);
+std::async(&amp;C::memfunc,sp,42,77); } ~~~
+</code></pre>
+
+<p>如果想声明callable object, 一般而言可使用class std::function&lt;&gt;</p>
+
+  </div>
+
+</article>
 
       </div>
     </div>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Item 7: Distinguish between () and {} when creating objects.</title>
+  <meta name="description" content="Saturday, 02. September 2017 06:46PM # Item 7: Distinguish between () and {} when creating objects.# 条目7：创建对象时，仔细区分 () 与 {} 的不同 。">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://jtpan.me/2017/09/03/EMC++I07.html">
+  <link rel="alternate" type="application/rss+xml" title="Jtpan World" href="http://jtpan.me/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Jtpan World</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Item 7: Distinguish between () and {} when creating objects.</h1>
+    <p class="post-meta"><time datetime="2017-09-03T02:46:00+08:00" itemprop="datePublished">Sep 3, 2017</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">Jtpan</span></span></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>Saturday, 02. September 2017 06:46PM <br />
+# Item 7: Distinguish between () and {} when creating objects.<br />
+# 条目7：创建对象时，仔细区分 () 与 {} 的不同 。</p>
+
+<h2 id="section">术语&amp;概念</h2>
+<ul>
+  <li>
+    <h3 id="section-1"><strong>()</strong></h3>
+    <p>parentheses, 圆括号。</p>
+  </li>
+  <li>
+    <h3 id="section-2"><strong>{}</strong></h3>
+    <p>braces, 花括号</p>
+  </li>
+</ul>
+
+<p>==Example==<br />
+~~~c++<br />
+int x(0);</p>
+
+<p>int z{ 0 }; //Braced initialization<br />
+~~~</p>
+
+<h2 id="section-3">快速笔记</h2>
+<ol>
+  <li>取决于个人观点不同，C++11中体现出的初始化对象的语法选择，可谓丰富到令人尴尬或者说是一团令人困惑之物。
+    <ul>
+      <li>圆括号，等号，花括号，等号+花括号</li>
+      <li>有些情况实际上是copy constructor被调用，而C++新手（newbies）会错认为是copy assignment</li>
+      <li>虽然C++98也有好几种初始化语法，但是还是有些情况使其语法不能胜任。比如，直接将一组特定的值指定给STL容器中的元素作为初值。</li>
+    </ul>
+  </li>
+  <li>三连胜般的好处(A trifecta of of goodness)列举！Brace initialization的好处有：
+    <ul>
+      <li>最广泛多样的使用上下文</li>
+      <li>禁止内建类型(built-in type)的隐式窄向转型(narrowing conversion)。</li>
+      <li>免疫C++最恼人的解析（C++’s most vexing parse）问题</li>
+    </ul>
+  </li>
+  <li>既然这么好，本条目为何不改名叫“宁愿使用花括号初始化语法”(Prefer braced initialization syntax)？<br />
+因为这个语法的缺点就是：时有“惊喜”相伴！当braced initializer, <code>std::initializer_lists</code>和构造函数重载决议（constructor overload resolution）三者互相作用时，会导致代码看上去应该做的事情与实际做的事情南辕北辙。比如Item 2中auto的例子，事实上你越喜欢auto，就越少对使用花括号初始化上心。
+    <ul>
+      <li>当没有涉及<code>std::initializer_list</code>形参时，圆括号和花括号含义相同</li>
+      <li>一旦存在以<code>std::initializer_list</code>为形参的构造函数时，只要使用花括号那么编译器就会强烈的倾向使用该重载（override）。只要有<strong>任何</strong>可能的手段，编译器就会采用那样的解释。</li>
+      <li>有时即使存在最佳匹配，编译器也会为了能匹配上<code>std::initializer_list</code>而试图去进行一次窄向转型最终失败。即使编译失败也不去匹配正确答案。</li>
+      <li>只有完全没可能转型时，编译器才会放弃初始列(std::initializer_list)而转向其他重载。</li>
+    </ul>
+  </li>
+  <li>注意一个罕见情况：当使用一组空的花括号构造对象时，指的是</li>
+</ol>
+
+<ul>
+  <li>空的参数列表？</li>
+  <li>一个空的初值列（std::initializer_list）？  <br />
+答案是空的参数列表。记住这里空花括号表示没有参数，而不是指有一个空的初值列作为参数。</li>
+  <li>表示空的初值列需要额外一个花括号。</li>
+</ul>
+
+<ol>
+  <li>关于<code>std::initializer_list</code>这些信息对日常编程影响能有多大呢？很大。std::vector中就有一个这样的构造函数。尤其是vector接受两个参数时。作为告诫，
+    <ul>
+      <li>作为类(class)的作者要避免设计出仅仅因选用括号的不同就会造成重载决议不同的类。并且在给原有的类添加以初值列为形参的重载构造函数时要审慎地决定。问题不仅在于添加初值列重载会改变既存代码的行为(任何重载都会)，而在于初值列参数版本的函数不是简单地参与竞争，而是给其他重载蒙上了巨大阴影。</li>
+      <li>作为类的使用者，要小心选择这两种语法。大多数开发者选择主要使用其中之一，只有必要时才用另一个。</li>
+      <li>对于模板(template)作者来说，尤其沮丧。通常无法知道应该使用哪种。</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="section-4">例子 (未完成)</h2>
+<ol>
+  <li>为了处理多种初始化语法带来的混乱已及支持一些特殊使用场景。C++11引入uniform initialization语法，一种能（至少在概念上能）用于任何地方表达任何东西的初始化语法。  <br />
+这是基于花括号（braces）的语法，因此我们偏好选择术语braced initialization。uniform initialization是个概念。Braced initialization是一个句法结构。<br />
+举例三种使用场景，现有的语法中只有Braced initialization可以适用于所有情况。也就不难理解为何叫uniform initialization了。
+    <ul>
+      <li>指定一组值来初始化容器元素</li>
+      <li>为非静态数据成员指定默认初值</li>
+      <li>初始化uncopyable的对象</li>
+    </ul>
+  </li>
+</ol>
+
+<h2 id="section-5">谨记要点</h2>
+<ul>
+  <li>花括号初始化(Braced initialization)语法，适用范围最广，预防窄向转型，免疫C++之最恼人解析（most vexing parse）。</li>
+  <li>碰到构造函数重载决议时， 花括号语法会使编译器极尽所有可能去匹配std::initializer_list, 即使有其他更好的匹配也无济于事。</li>
+  <li>一个例子：当用两个参数去创建一个<code>std::vector&lt;numeric type&gt;</code>时，选择圆括号还是花括号会使语义有重大不同。</li>
+  <li>为模板内部的对象创建行为选择其中一种语法很有挑战性。</li>
+</ul>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li><a href="mailto:panjingtian@126.com">panjingtian@126.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/justuspan"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">justuspan</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Copyright &copy 2017 Jtpan. All rights reserved.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

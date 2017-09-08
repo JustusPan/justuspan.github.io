@@ -6,12 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Jtpan World</title>
-  <meta name="description" content="Copyright &copy 2017 Jtpan. All rights reserved.
-">
+  <title>Tuple Comparison</title>
+  <meta name="description" content="Sunday, 27. August 2017 12:29PM #tuple 比较运算符tuple的比较规则与pair类似。以下摘录自INCITS/ISO/IEC 14882-2012~~~template&lt;class… TTypes, class… UTypes&gt;bool operator&lt;(...">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://jtpan.me/">
+  <link rel="canonical" href="http://jtpan.me/2017/08/27/tuple-comparison.html">
   <link rel="alternate" type="application/rss+xml" title="Jtpan World" href="http://jtpan.me/feed.xml">
 </head>
 
@@ -55,75 +54,36 @@
 
     <div class="page-content">
       <div class="wrapper">
-        <div class="home">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
-  <h1 class="page-heading">Posts</h1>
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Tuple Comparison</h1>
+    <p class="post-meta"><time datetime="2017-08-27T20:29:00+08:00" itemprop="datePublished">Aug 27, 2017</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">Jtpan</span></span></p>
+  </header>
 
-  <ul class="post-list">
-    
-      <li>
-        <nobr>
-        Sep 3, 2017 <a class="post-link" href="/2017/09/03/EMC++I07.html">Item 7: Distinguish between () and {} when creating objects.</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 28, 2017 <a class="post-link" href="/2017/08/28/EMC++I06.html">Item 6: Use the explicitly typed initializer idiom when auto deduces undersired types</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/closure-lambda-expression.html">Closure and Lambda Expression</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/EMC++I05.html">Item 5: Prefer auto to explicit type declarations.</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/tuple-comparison.html">Tuple Comparison</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/pair-comparison.html">Pair Comparison</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/piecewise-construction.html">Piecewise Construction</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 27, 2017 <a class="post-link" href="/2017/08/27/callable-object.html">Callable Object</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 22, 2017 <a class="post-link" href="/2017/08/22/EMC++I03.html">Item 3: Understand decltype</a>
-        </nobr>
-      </li>
-    
-      <li>
-        <nobr>
-        Aug 21, 2017 <a class="post-link" href="/2017/08/21/EMC++I09.html">Item 9: Prefer alias declarations to typedefs.</a>
-        </nobr>
-      </li>
-    
-  </ul>
+  <div class="post-content" itemprop="articleBody">
+    <p>Sunday, 27. August 2017 12:29PM <br />
+#tuple 比较运算符<br />
+tuple的比较规则与pair类似。以下摘录自INCITS/ISO/IEC 14882-2012<br />
+~~~<br />
+template&lt;class… TTypes, class… UTypes&gt;<br />
+bool operator&lt;(const tuple<ttypes...>&amp; t, const tuple<utypes...>&amp; u);</utypes...></ttypes...></p>
 
-</div>
+<p>Requires: For all i, where 0 &lt;= i and i &lt; sizeof…(Types), get<i>(t) &lt; get<i>(u) and get<i>(u)
+&lt; get<i>(t) are valid expressions returning types that are convertible to bool. sizeof…(TTypes)
+== sizeof…(UTypes).</i></i></i></i></p>
+
+<p>Returns: The result of a lexicographical comparison between t and u. The result is defined as:<br />
+(bool)(get&lt;0&gt;(t) &lt; get&lt;0&gt;(u)) || (!(bool)(get&lt;0&gt;(u) &lt; get&lt;0&gt;(t)) &amp;&amp; t tail &lt; u tail ), where<br />
+r tail for some tuple r is a tuple containing all but the first element of r. For any two zero-length tuples<br />
+e and f, e &lt; f returns false.<br />
+~~~<br />
+The result is defined as:<br />
+==(bool)(get&lt;0&gt;(t) &lt; get&lt;0&gt;(u)) || (!(bool)(get&lt;0&gt;(u) &lt; get&lt;0&gt;(t)) &amp;&amp; t tail &lt; u tail )==</p>
+
+  </div>
+
+</article>
 
       </div>
     </div>

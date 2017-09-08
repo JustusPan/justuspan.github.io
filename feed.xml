@@ -1,0 +1,1101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jtpan World</title>
+    <description>Copyright &amp;copy 2017 Jtpan. All rights reserved.
+</description>
+    <link>http://jtpan.me/</link>
+    <atom:link href="http://jtpan.me/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Fri, 08 Sep 2017 22:59:55 +0800</pubDate>
+    <lastBuildDate>Fri, 08 Sep 2017 22:59:55 +0800</lastBuildDate>
+    <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Item 7: Distinguish between () and {} when creating objects.</title>
+        <description>&lt;p&gt;Saturday, 02. September 2017 06:46PM &lt;br /&gt;
+# Item 7: Distinguish between () and {} when creating objects.&lt;br /&gt;
+# 条目7：创建对象时，仔细区分 () 与 {} 的不同 。&lt;/p&gt;
+
+&lt;h2 id=&quot;section&quot;&gt;术语&amp;amp;概念&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;h3 id=&quot;section-1&quot;&gt;&lt;strong&gt;()&lt;/strong&gt;&lt;/h3&gt;
+    &lt;p&gt;parentheses, 圆括号。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;h3 id=&quot;section-2&quot;&gt;&lt;strong&gt;{}&lt;/strong&gt;&lt;/h3&gt;
+    &lt;p&gt;braces, 花括号&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;==Example==&lt;br /&gt;
+~~~c++&lt;br /&gt;
+int x(0);&lt;/p&gt;
+
+&lt;p&gt;int z{ 0 }; //Braced initialization&lt;br /&gt;
+~~~&lt;/p&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;快速笔记&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;取决于个人观点不同，C++11中体现出的初始化对象的语法选择，可谓丰富到令人尴尬或者说是一团令人困惑之物。
+    &lt;ul&gt;
+      &lt;li&gt;圆括号，等号，花括号，等号+花括号&lt;/li&gt;
+      &lt;li&gt;有些情况实际上是copy constructor被调用，而C++新手（newbies）会错认为是copy assignment&lt;/li&gt;
+      &lt;li&gt;虽然C++98也有好几种初始化语法，但是还是有些情况使其语法不能胜任。比如，直接将一组特定的值指定给STL容器中的元素作为初值。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;三连胜般的好处(A trifecta of of goodness)列举！Brace initialization的好处有：
+    &lt;ul&gt;
+      &lt;li&gt;最广泛多样的使用上下文&lt;/li&gt;
+      &lt;li&gt;禁止内建类型(built-in type)的隐式窄向转型(narrowing conversion)。&lt;/li&gt;
+      &lt;li&gt;免疫C++最恼人的解析（C++’s most vexing parse）问题&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;既然这么好，本条目为何不改名叫“宁愿使用花括号初始化语法”(Prefer braced initialization syntax)？&lt;br /&gt;
+因为这个语法的缺点就是：时有“惊喜”相伴！当braced initializer, &lt;code&gt;std::initializer_lists&lt;/code&gt;和构造函数重载决议（constructor overload resolution）三者互相作用时，会导致代码看上去应该做的事情与实际做的事情南辕北辙。比如Item 2中auto的例子，事实上你越喜欢auto，就越少对使用花括号初始化上心。
+    &lt;ul&gt;
+      &lt;li&gt;当没有涉及&lt;code&gt;std::initializer_list&lt;/code&gt;形参时，圆括号和花括号含义相同&lt;/li&gt;
+      &lt;li&gt;一旦存在以&lt;code&gt;std::initializer_list&lt;/code&gt;为形参的构造函数时，只要使用花括号那么编译器就会强烈的倾向使用该重载（override）。只要有&lt;strong&gt;任何&lt;/strong&gt;可能的手段，编译器就会采用那样的解释。&lt;/li&gt;
+      &lt;li&gt;有时即使存在最佳匹配，编译器也会为了能匹配上&lt;code&gt;std::initializer_list&lt;/code&gt;而试图去进行一次窄向转型最终失败。即使编译失败也不去匹配正确答案。&lt;/li&gt;
+      &lt;li&gt;只有完全没可能转型时，编译器才会放弃初始列(std::initializer_list)而转向其他重载。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;注意一个罕见情况：当使用一组空的花括号构造对象时，指的是&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;空的参数列表？&lt;/li&gt;
+  &lt;li&gt;一个空的初值列（std::initializer_list）？  &lt;br /&gt;
+答案是空的参数列表。记住这里空花括号表示没有参数，而不是指有一个空的初值列作为参数。&lt;/li&gt;
+  &lt;li&gt;表示空的初值列需要额外一个花括号。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;关于&lt;code&gt;std::initializer_list&lt;/code&gt;这些信息对日常编程影响能有多大呢？很大。std::vector中就有一个这样的构造函数。尤其是vector接受两个参数时。作为告诫，
+    &lt;ul&gt;
+      &lt;li&gt;作为类(class)的作者要避免设计出仅仅因选用括号的不同就会造成重载决议不同的类。并且在给原有的类添加以初值列为形参的重载构造函数时要审慎地决定。问题不仅在于添加初值列重载会改变既存代码的行为(任何重载都会)，而在于初值列参数版本的函数不是简单地参与竞争，而是给其他重载蒙上了巨大阴影。&lt;/li&gt;
+      &lt;li&gt;作为类的使用者，要小心选择这两种语法。大多数开发者选择主要使用其中之一，只有必要时才用另一个。&lt;/li&gt;
+      &lt;li&gt;对于模板(template)作者来说，尤其沮丧。通常无法知道应该使用哪种。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;section-4&quot;&gt;例子 (未完成)&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;为了处理多种初始化语法带来的混乱已及支持一些特殊使用场景。C++11引入uniform initialization语法，一种能（至少在概念上能）用于任何地方表达任何东西的初始化语法。  &lt;br /&gt;
+这是基于花括号（braces）的语法，因此我们偏好选择术语braced initialization。uniform initialization是个概念。Braced initialization是一个句法结构。&lt;br /&gt;
+举例三种使用场景，现有的语法中只有Braced initialization可以适用于所有情况。也就不难理解为何叫uniform initialization了。
+    &lt;ul&gt;
+      &lt;li&gt;指定一组值来初始化容器元素&lt;/li&gt;
+      &lt;li&gt;为非静态数据成员指定默认初值&lt;/li&gt;
+      &lt;li&gt;初始化uncopyable的对象&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;section-5&quot;&gt;谨记要点&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;花括号初始化(Braced initialization)语法，适用范围最广，预防窄向转型，免疫C++之最恼人解析（most vexing parse）。&lt;/li&gt;
+  &lt;li&gt;碰到构造函数重载决议时， 花括号语法会使编译器极尽所有可能去匹配std::initializer_list, 即使有其他更好的匹配也无济于事。&lt;/li&gt;
+  &lt;li&gt;一个例子：当用两个参数去创建一个&lt;code&gt;std::vector&amp;lt;numeric type&amp;gt;&lt;/code&gt;时，选择圆括号还是花括号会使语义有重大不同。&lt;/li&gt;
+  &lt;li&gt;为模板内部的对象创建行为选择其中一种语法很有挑战性。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Sun, 03 Sep 2017 02:46:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/09/03/EMC++I07.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/09/03/EMC++I07.html</guid>
+        
+        <category>Effective</category>
+        
+        <category>Modern</category>
+        
+        <category>C++</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Item 6: Use the explicitly typed initializer idiom when auto deduces undersired types</title>
+        <description>&lt;p&gt;Sunday, 27. August 2017 09:47PM &lt;br /&gt;
+# Item 6: Use the explicitly typed initializer idiom when auto deduces undersired types&lt;br /&gt;
+#条目6：当auto推断出不希望得到的类型时，使用explicitly typed initializer idiom(显式类型初始化器惯用法)&lt;/p&gt;
+
+&lt;p&gt;##术语&amp;amp;概念&lt;br /&gt;
+- ###&lt;strong&gt;explicitly typed initializer idiom&lt;/strong&gt;&lt;br /&gt;
+显式类型初始化器惯用法&lt;br /&gt;
+在初始化时显式类型转换以改变auto的类型推断结果的习惯用法&lt;/p&gt;
+
+&lt;p&gt;Example&lt;br /&gt;
+~~~&lt;br /&gt;
+double calcEpsilon();&lt;br /&gt;
+auto ep = static_cast&lt;float&gt;(calcEpsilon());
+~~~&lt;/float&gt;&lt;/p&gt;
+
+&lt;p&gt;##快速笔记&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;auto自动类型推断有时候会得到我们不希望看到的结果。什么时候？当初始化表达式返回一个带隐式转换的代理类(Proxy Class)对象的时候。&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code&gt;operator[]&lt;/code&gt; for &lt;code&gt;std::vector&amp;lt;bool&amp;gt;&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code&gt;std::vector&amp;lt;bool&amp;gt;::reference&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code&gt;operator+&lt;/code&gt; for &lt;code&gt;Matrix sum = m1 + m2 + m3 + m4;&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;如何觉察到这样的不可见的代理类(Proxy Class)？寻找头文件接口的蛛丝马迹。实践中，大多数开发者只有在追踪调试一些令人迷惑的编译问题或调试不正确的单元测试结果的时候才发现Proxy Class被使用了。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;解决这个问题要使用explicitly typed initializer idiom.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;explicitly typed initializer idiom 除了可以解决上述问题以外。还有强调这里的类型转换是经过审慎的考虑的作用。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;##例子&lt;br /&gt;
+==Example 1==&lt;br /&gt;
+我们先来看没有问题的使用方法&lt;br /&gt;
+~~~&lt;br /&gt;
+std::vector&lt;bool&gt; features(const Widget&amp;amp; w);&lt;/bool&gt;&lt;/p&gt;
+
+&lt;p&gt;Widget w;&lt;br /&gt;
+…&lt;/p&gt;
+
+&lt;p&gt;bool highPriority = features(w)[5]; //is w high priority?&lt;br /&gt;
+…&lt;/p&gt;
+
+&lt;p&gt;processWidget(w, highPriority);  //process w in accord&lt;br /&gt;
+				//with its priority&lt;br /&gt;
+~~~&lt;br /&gt;
+此时我们用auto替代highPriority的显式类型，这个改动看上去似乎无害。&lt;br /&gt;
+~~~&lt;br /&gt;
+auto highPriority = features(w)[5];&lt;br /&gt;
+…&lt;br /&gt;
+processWidget(w, highPriority);&lt;br /&gt;
+~~~&lt;br /&gt;
+但情况发生了改变，所有的代码会继续编译成功，但是processWidget的行为不再可预期。&lt;/p&gt;
+
+&lt;p&gt;为什么？答案可能令人感到惊奇。因为这种情况下highPriority的类型不再是bool。虽然从概念上说&lt;code&gt;std::vector&amp;lt;bool&amp;gt;&lt;/code&gt;持有一些bool变量。但是&lt;code&gt;std::vector&amp;lt;bool&amp;gt;&lt;/code&gt;的&lt;code&gt;operator[]&lt;/code&gt;并不返回这个容器中的一个元素的引用（对于其他每个类型,&lt;code&gt;std::vector::operator[]&lt;/code&gt;都会返回这样的引用，唯独bool除外）。作为替代，它反回了一个&lt;code&gt;std::vector&amp;lt;bool&amp;gt;::reference&lt;/code&gt;对象。（是内嵌(nested)在&lt;code&gt;std::vector&amp;lt;bool&amp;gt;&lt;/code&gt;里的一个类）&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;std::vector&amp;lt;bool&amp;gt;::reference&lt;/code&gt;之所以会存在，是因为&lt;code&gt;std::vector&amp;lt;bool&amp;gt;&lt;/code&gt;被指定用一种紧密形式（packed form）来表示bool值，每一个bit代表一个bool值。这个做法给&lt;code&gt;operator[]&lt;/code&gt;制造了一个问题：&lt;code&gt;std::vector&amp;lt;T&amp;gt;::operator[]&lt;/code&gt;应该返回T&amp;amp;,但是这里的元素实际是个bit，C++禁止对bit的引用。所以返回bool&amp;amp;是不行了，只能返回一个对象让它表现起来像一个bool&amp;amp;。关于这个技术的所有细节，此处按下不表。比喻地说，这里的隐式转换只是一幅更大的马赛克嵌画中的其中一块。&lt;/p&gt;
+
+&lt;p&gt;我们再来比较例子中的情况&lt;br /&gt;
+~~~&lt;br /&gt;
+bool highPriority = feature(w)[5];  //declare highPriority’s type explicitly&lt;br /&gt;
+~~~&lt;br /&gt;
+等式右边返回了一个&lt;code&gt;std::vector&amp;lt;bool&amp;gt;::reference&lt;/code&gt;并且隐式转换了成了一个bool。highPriority确实的保存了第5个bit的值。&lt;br /&gt;
+再看&lt;br /&gt;
+~~~&lt;br /&gt;
+auto highPriority = features(w)[5];  //deduce highPriority’s type&lt;br /&gt;
+~~~&lt;br /&gt;
+等式右边反回了一个&lt;code&gt;std::vector&amp;lt;bool&amp;gt;::reference&lt;/code&gt;并且auto直接推断highPriority就是这个类型，因此没有bool对象被构造出来。&lt;br /&gt;
+这里highPriority是什么值取决于&lt;code&gt;std::vector&amp;lt;bool&amp;gt;::reference&lt;/code&gt;是如何实现的。一种实现是，这个对象持有一个指向机器字节（machine word）的指针，这个字节持有被引用的位（bit）。考虑到highPriority初始化的含义（jtpan：接受一个引用），我们就假设这里的实现是内存就地（in place）的。&lt;br /&gt;
+等号右边的feature调用返回了一个临时容器，然后临时容器将包含了上述指针的reference对象返回给了highPriority，通过偏移量reference可以从那个字节中找到第五位（bit）。当这个语句调用结束，临时对象销毁，然后highPriority就仅仅包含一个空悬的指针（dangling pointer）了。这就是导致调用了processWidget的如下语句是未定义行为（undefined behavior）的原因。&lt;br /&gt;
+~~~&lt;br /&gt;
+processWidget(w, highPriority);  // undefined behavior!&lt;br /&gt;
+				// highPriority contains dangling pointer!&lt;br /&gt;
+~~~&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;std::vector&amp;lt;bool&amp;gt;::reference&lt;/code&gt;就是一个代理类（proxy class）： 为了模仿（emulating）和扩张(augmenting)其他某些类的行为而存在的类。&lt;br /&gt;
+事实上，设计模式“Proxy”是在软件设计模式万神殿中屹立最久的成员之一。&lt;/p&gt;
+
+&lt;p&gt;在一些使用了表达式模板（expression templates）技术的C++库中，我们也可以看到这样的代理类。那样的库一开始就是为了改进数值计算的效率而被开发的。&lt;br /&gt;
+~~~&lt;br /&gt;
+Matrix sum = m1 + m2 + m3 + m4;&lt;br /&gt;
+~~~&lt;br /&gt;
+如果&lt;code&gt;operator+&lt;/code&gt;返回的是计算结果的代理类而不是结果本身的话，这个矩阵计算会有效率的多。（jtpan:为什么有效率？大概是因为lazy evaluation）&lt;br /&gt;
+例如返回Sum&amp;lt;Matrix,Matrix&amp;gt;, 就像bool那个例子里的reference一样，这个计算结果的代理类可以隐式转换成Matrix。这样等式右边的实际类型就是&lt;code&gt;Sum&amp;lt;Sum&amp;lt;Sum&amp;lt;Matrix,Matrix&amp;gt;,Matrix&amp;gt;,Matrix&amp;gt;&lt;/code&gt;, 这肯定是一个应该向客户（clients）隐藏的类。&lt;/p&gt;
+
+&lt;p&gt;一个一般性的准则是，“不可见的（invisible）”的代理类（proxy class）不能很好的与auto一起工作。那样的类通常不被设计成能活过一个单语句（single statement），所以创建那样的类的一个对象变量已经趋向于打破了基本的库设计假设（library design assumptions）。我们看到打破那样的假设会带来未定义行为。&lt;/p&gt;
+
+&lt;p&gt;因此我们要避免如下形式的代码：&lt;br /&gt;
+~~~&lt;br /&gt;
+auto someVar = expression of “invisible” proxy class type&lt;br /&gt;
+~~~&lt;/p&gt;
+
+&lt;p&gt;==Example 2==&lt;br /&gt;
+那我们应该怎么样发现这种“不可见”的代理类呢？就从接口中寻找蛛丝马迹。&lt;br /&gt;
+~~~&lt;br /&gt;
+namespace std {&lt;/p&gt;
+
+&lt;p&gt;template &lt;class allocator=&quot;&quot;&gt;
+  class vector&amp;lt;bool, Allocator&amp;gt; {
+    ...
+    class reference {...}&lt;/class&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;reference operator[](size_type n);   }; } ~~~ 假设你知道`std::vector&amp;lt;T&amp;gt;::operator[]`通常会返回一个T&amp;amp;, 那这里不符合惯例的返回值就提示了你有个proxy class 被使用了。
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;==Example 3==&lt;br /&gt;
+一旦auto被决定用来推断出代理类的类型而不是被代理的类型的时候，就已经表明了解决这个问题的方案不会是放弃使用auto。auto本身没有问题。问题在于auto没有推断出你想要的类型。解决方案就是强迫他作一个不同的类型推断。这个方法被我们称为the explicitly typed initializer idiom（显式类型初始化器惯用法）。例子如下&lt;br /&gt;
+~~~&lt;br /&gt;
+auto highPriority = static_cast&lt;bool&gt;(features(w)[5]);
+~~~
+在Matrix的例子中
+~~~
+auto sum = static_cast&lt;matrix&gt;(m1 + m2 + m3 + m4);
+~~~&lt;/matrix&gt;&lt;/bool&gt;&lt;/p&gt;
+
+&lt;p&gt;==Example 4==&lt;br /&gt;
+这种用法同时可以强调你是经过了审慎地（deliberately）考虑之后才决定创建一个类型不同于初始化表达式类型的的变量。&lt;br /&gt;
+~~~&lt;br /&gt;
+double calcEpsilon(); //return tolerance value&lt;br /&gt;
+~~~&lt;br /&gt;
+如果你知道这里float的精度足够并且你确实在意float和double之间的大小差别，那么你可以声明一个float变量去保存返回结果，像这样：&lt;br /&gt;
+~~~&lt;br /&gt;
+float ep = calcEpsilon();  //implicity convert double-&amp;gt;float&lt;br /&gt;
+~~~&lt;br /&gt;
+这很难说有表达出你“审慎地（deliberately）将函数的返回结果精度降为float”的意思。&lt;br /&gt;
+但是像下面这样写，你的意思就到位了。&lt;br /&gt;
+~~~&lt;br /&gt;
+auto ep = static_cast&lt;float&gt;(calcEpsilon());
+~~~&lt;/float&gt;&lt;/p&gt;
+
+&lt;p&gt;类似的例子：&lt;br /&gt;
+你需要计算一个元素在有随机访问迭代器（random access iterators）的容器中的索引值（index）。你将被给予一个介于0.0和1.0之间的double数值d来指明该元素坐落的位置距离容器开头有多远。假设你很确信容器c不会为空。&lt;br /&gt;
+~~~&lt;br /&gt;
+int idx = d * c.size();&lt;br /&gt;
+if (idx == c.size()) –idx;  //keep idx valid when d == 1.0&lt;br /&gt;
+~~~&lt;br /&gt;
+但是这种写法将你是故意将double转换成int的事实变得模糊不清。如果这里使用explicitly typed initializer idiom，那么事情就变得显然易懂。&lt;br /&gt;
+~~~&lt;br /&gt;
+auto idx = static_cast&lt;int&gt;(d * c.size());
+if (idx == c.size()) --idx;  //keep idx valid when d == 1.0
+~~~&lt;/int&gt;&lt;/p&gt;
+
+&lt;p&gt;##谨记要点&lt;br /&gt;
+- “不可见”的代理类型 会导致auto针对初始化表达式推断出“错误的”类型。（jtpan：不是错误，只是不符合你的希望）。&lt;br /&gt;
+- explicitly typed initializer idiom强迫auto去推断出你希望他推断出的类型。&lt;/p&gt;
+</description>
+        <pubDate>Mon, 28 Aug 2017 05:47:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/08/28/EMC++I06.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/08/28/EMC++I06.html</guid>
+        
+        <category>Effective</category>
+        
+        <category>Modern</category>
+        
+        <category>C++</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Closure and Lambda Expression</title>
+        <description>&lt;p&gt;Sunday, 27. August 2017 03:36PM &lt;br /&gt;
+#closure和lambda expression&lt;br /&gt;
+参考：EMC++ chapter 6&lt;br /&gt;
+lambda expression简称lambda&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A lambda expression is just that: an expression. It’s part of the source code. In&lt;br /&gt;
+~~~&lt;br /&gt;
+std::find_if(container.begin(), container.end(),&lt;br /&gt;
+&lt;a href=&quot;int val&quot;&gt;&lt;/a&gt; { return 0 &amp;lt; val &amp;amp;&amp;amp; val &amp;lt; 10; });&lt;br /&gt;
+~~~&lt;br /&gt;
+&lt;em&gt;the highlighted expression is the lambda&lt;/em&gt;.(上段代码第二行&lt;code&gt;[](int val) { return 0 &amp;lt; val &amp;amp;&amp;amp; val &amp;lt; 10; }&lt;/code&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;lambda表达式只是一个表达式，是源代码的一部分。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A closure is the runtime object created by a lambda. Depending on the capture&lt;br /&gt;
+mode, closures hold copies of or references to the captured data.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;一个闭包(closure)是指某个由lambda创建出的运行时对象。取决于引导器的变量捕捉模式，闭包或是持有被捕捉变量的拷贝或是引用。(jtpan: 本质上是个函数对象)&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A closure class is a class from which a closure is instantiated. Each lambda causes&lt;br /&gt;
+compilers to generate a unique closure class. The statements inside a lambda&lt;br /&gt;
+become executable instructions in the member functions of its closure class.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;一个闭包类(closure class)就是指闭包所实例化的那个类。每一个lambda会引发编译器生成一个唯一的闭包类。而在lambda内部的述句变成了闭包类的成员函数中可执行的指令。&lt;/p&gt;
+</description>
+        <pubDate>Sun, 27 Aug 2017 23:36:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/08/27/closure-lambda-expression.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/08/27/closure-lambda-expression.html</guid>
+        
+        <category>C++</category>
+        
+        <category>Standard</category>
+        
+        <category>Library</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Item 5: Prefer auto to explicit type declarations.</title>
+        <description>&lt;p&gt;Sunday, 27. August 2017 03:02PM &lt;br /&gt;
+#Item 5: Prefer auto to explicit type declarations.&lt;br /&gt;
+#条目5：宁愿使用 auto 替代 explicit type declarations(显式类型声明)&lt;/p&gt;
+
+&lt;p&gt;##术语&amp;amp;概念&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;###&lt;strong&gt;explicit type declaration&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;用具体类型声明的方式&lt;/p&gt;
+
+&lt;p&gt;Example&lt;br /&gt;
+~~~&lt;br /&gt;
+int x;&lt;br /&gt;
+~~~&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;###&lt;strong&gt;auto声明法&lt;/strong&gt;&lt;br /&gt;
+~~~&lt;br /&gt;
+auto x3 = 0;&lt;br /&gt;
+~~~&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;##快速笔记&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;三个不用auto就感到有点困扰的使用小场景，用auto神清气爽。而且，C++14中lambda的形参也可以包含auto了,更加方便。&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;只声明却忘了初始化&lt;/li&gt;
+      &lt;li&gt;Iterator所指的对象的类型声明&lt;/li&gt;
+      &lt;li&gt;声明闭包(closure)的类型&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;指定闭包类型的话，用std::function对象也可以。但是这个方法通常会比auto占用空间更多，速度更慢。&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;std::function 语法冗长，需要重复的类型声明&lt;/li&gt;
+      &lt;li&gt;std::function 通常比 closure　要大。拥有固定大小，再在heap中分配内存来保存额外数据。可能抛出out-of-memory 异常(exception).&lt;/li&gt;
+      &lt;li&gt;归因于限制inline的实现细节和产生的间接函数调用(indirect function call), 调用一个std::function对象比调用一个auto声明的对象，几乎必然要慢。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;除了上述优点，auto还能避免”type shortcuts”问题。两个例子
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code&gt;std::vector&amp;lt;int&amp;gt;::size_type&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code&gt;std::pair&amp;lt;const std::string,int&amp;gt;&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;如果在你的专业判断下，觉得自己的代码用显式类型声明更清晰更加可维护，那可以继续这样使用。但是要记住：在采纳编程语言世界中被广泛知晓的类型推断(type inference)时，C++并没有开辟新的战场。得益于动态类型语言(Perl, Python, Ruby)的成功,　在类型推断被开发社区广泛体验以后，可以说这个技术与创造维护大规模，工业强度的代码基底没有冲突。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;关于”瞄一眼”的快速可读性下降的担忧
+    &lt;ul&gt;
+      &lt;li&gt;有IDE可以查看类型&lt;/li&gt;
+      &lt;li&gt;很多情况下更加抽象的类型认知和确切的类型一样有用。对于这种只需要知道抽象类型的情况，精良选择的变量名称也可以提供这些信息。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;auto可以减少微妙的错误，提高正确性和效率。而且重构的时候比较方便。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;##例子　&lt;/p&gt;
+
+&lt;p&gt;==Example 1==&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;int x;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;忘记初始化&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;template&amp;lt;typename It&amp;gt;		// algorithm to dwim (&quot;do what I mean&quot;)
+void dwim(It b, It e)		// for all elements in range from
+{							// b to e
+  for (; b != e; ++b) {
+    typename std::iterator_traits&amp;lt;It&amp;gt;::value_type
+    currValue = *b;
+    ...
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;类型名字太长&lt;/p&gt;
+
+&lt;p&gt;上述两种情况用auto就轻松解决，比如&lt;br /&gt;
+~~~&lt;br /&gt;
+int x1;  //potentially uninitialized&lt;/p&gt;
+
+&lt;p&gt;auto x2; //error! initializer required&lt;/p&gt;
+
+&lt;p&gt;auto x3 = 0;  //fine, x3’s value is well-defined&lt;/p&gt;
+
+&lt;p&gt;template&lt;typename it=&quot;&quot;&gt;  //as before
+void dwim(It b, It e)
+{
+  for (; b != e; ++b) {
+    auto currValue = *b;
+    ...
+  }
+}
+~~~&lt;/typename&gt;&lt;/p&gt;
+
+&lt;p&gt;再来看看闭包的情况&lt;br /&gt;
+C++11中&lt;br /&gt;
+~~~&lt;br /&gt;
+auto derefUPless = &lt;br /&gt;
+  &lt;a href=&quot;const std::unique_ptr&amp;lt;Widget&amp;gt;&amp;amp; p1,
+     const std::unique_ptr&amp;lt;Widget&amp;gt;&amp;amp; p2&quot;&gt;&lt;/a&gt;&lt;br /&gt;
+  { return *p1 &amp;lt; *p2; };&lt;br /&gt;
+~~~&lt;/p&gt;
+
+&lt;p&gt;C++14中&lt;br /&gt;
+~~~&lt;br /&gt;
+auto derefLess =&lt;br /&gt;
+  &lt;a href=&quot;const auto&amp;amp; p1,
+     const auto&amp;amp; p2&quot;&gt;&lt;/a&gt;&lt;br /&gt;
+  { return *p1 &amp;lt; *p2; };&lt;br /&gt;
+~~~&lt;/p&gt;
+
+&lt;p&gt;==Example 2==&lt;br /&gt;
+如果说std::function所指的callable object有如下的签名式(signature)&lt;br /&gt;
+~~~&lt;br /&gt;
+bool(const std::unique_ptr&lt;widget&gt;&amp;amp;,
+     const std::unique_ptr&lt;widget&gt;&amp;amp;)
+~~~
+那么你就需要如下的声明
+~~~
+std::function&amp;lt;bool(const std::unique_ptr&lt;widget&gt;&amp;amp;,
+                   const std::unique_ptr&lt;widget&gt;&amp;amp;)&amp;gt; func;
+~~~
+也就是说在C++11中我们不借助auto也可以用如下语句声明这个derefUPLess,
+~~~
+std::function&amp;lt;bool(const std::unique_ptr&lt;widget&gt;&amp;amp;,
+                   const std::unique_ptr&lt;widget&gt;&amp;amp;)&amp;gt;
+derefUPLess = [](const std::unique_ptr&lt;widget&gt;&amp;amp; p1,
+                 const std::unique_ptr&lt;widget&gt;&amp;amp; p2)
+                { return *p1 &amp;lt; *p2; };
+~~~&lt;/widget&gt;&lt;/widget&gt;&lt;/widget&gt;&lt;/widget&gt;&lt;/widget&gt;&lt;/widget&gt;&lt;/widget&gt;&lt;/widget&gt;&lt;/p&gt;
+
+&lt;p&gt;==Example 3==&lt;br /&gt;
+~~~&lt;br /&gt;
+std::vector&lt;int&gt;v;
+...
+unsigned sz = v.size();
+~~~
+v.size()的官方返回类型是`std::vector&lt;int&gt;::size_type`,　但是很少开发者意识到这是unsigned integral类型。很多开发者认为这里使用unsigned已经足够好了。在32位系统中他们有同样的大小。但是在64位系统中，unsigned是32位的，但是`std::vector&lt;int&gt;::size_type`是64位的.这会带来一些移植问题。
+使用auto的话就不用理会这些问题了
+~~~
+auto sz = v.size();  //sz&#39;s type is std::vector&lt;int&gt;::size_type
+~~~&lt;/int&gt;&lt;/int&gt;&lt;/int&gt;&lt;/int&gt;&lt;/p&gt;
+
+&lt;p&gt;再来考虑另一个例子&lt;br /&gt;
+~~~&lt;br /&gt;
+std::unordered_map&amp;lt;std::string, int&amp;gt; m;&lt;br /&gt;
+…&lt;/p&gt;
+
+&lt;p&gt;for (const std::pair&amp;lt;std::string, int&amp;gt;&amp;amp; p : m)&lt;br /&gt;
+{&lt;br /&gt;
+  …  //do something with p&lt;br /&gt;
+}&lt;br /&gt;
+~~~&lt;br /&gt;
+这里看起来很完美，理据服。但是事实上存在一个问题，你发现了么？&lt;br /&gt;
+出差错的地方在于我们要知道容器&lt;code&gt;std::unordered_map&lt;/code&gt;的key部分是const, 所以这个哈希表(hash tabel)中的&lt;code&gt;std::pair&lt;/code&gt;的类型不是&lt;code&gt;std::pair&amp;lt;std::string,int&amp;gt;&lt;/code&gt;,而是&lt;code&gt;std::pair&amp;lt;const std::string,int&amp;gt;&lt;/code&gt;. 上面这样写的结果就是使得编译器力求找到办法将哈希表中的&lt;code&gt;std::pair&amp;lt;const std::string,int&amp;gt;&lt;/code&gt;对象转换为&lt;code&gt;std::pair&amp;lt;std::string,int&amp;gt;&lt;/code&gt;对象。它们将对哈希表中的每一个对象进行复制创建出临时对象，并且将引用p绑定在上面，从而成功做到转换。&lt;br /&gt;
+然后你就会对对这段代码的效率感到惊讶，因为你本来几乎很确定地只想把引用p绑定到表中的每个对象上去。&lt;/p&gt;
+
+&lt;p&gt;像这样的无意识的类型错配能够用auto避免，就像下面这样&lt;br /&gt;
+~~~&lt;br /&gt;
+for (const auto&amp;amp; p : m) {&lt;br /&gt;
+  …  // as before&lt;br /&gt;
+}&lt;br /&gt;
+~~~&lt;/p&gt;
+
+&lt;p&gt;##谨记要点&lt;br /&gt;
+- auto变量必须初始化。普遍免疫那些会引发移植性和效率问题的类型错配。简化重构(refactoring)过程。通常比显式指定类型需要更少的键盘键入。&lt;br /&gt;
+- 被auto自动推导类型的变量受制于一些陷阱，这些内容将在Item 2和 Item 6描述。&lt;/p&gt;
+
+</description>
+        <pubDate>Sun, 27 Aug 2017 23:02:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/08/27/EMC++I05.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/08/27/EMC++I05.html</guid>
+        
+        <category>Effective</category>
+        
+        <category>Modern</category>
+        
+        <category>C++</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Tuple Comparison</title>
+        <description>&lt;p&gt;Sunday, 27. August 2017 12:29PM &lt;br /&gt;
+#tuple 比较运算符&lt;br /&gt;
+tuple的比较规则与pair类似。以下摘录自INCITS/ISO/IEC 14882-2012&lt;br /&gt;
+~~~&lt;br /&gt;
+template&amp;lt;class… TTypes, class… UTypes&amp;gt;&lt;br /&gt;
+bool operator&amp;lt;(const tuple&lt;ttypes...&gt;&amp;amp; t, const tuple&lt;utypes...&gt;&amp;amp; u);&lt;/utypes...&gt;&lt;/ttypes...&gt;&lt;/p&gt;
+
+&lt;p&gt;Requires: For all i, where 0 &amp;lt;= i and i &amp;lt; sizeof…(Types), get&lt;i&gt;(t) &amp;lt; get&lt;i&gt;(u) and get&lt;i&gt;(u)
+&amp;lt; get&lt;i&gt;(t) are valid expressions returning types that are convertible to bool. sizeof…(TTypes)
+== sizeof…(UTypes).&lt;/i&gt;&lt;/i&gt;&lt;/i&gt;&lt;/i&gt;&lt;/p&gt;
+
+&lt;p&gt;Returns: The result of a lexicographical comparison between t and u. The result is defined as:&lt;br /&gt;
+(bool)(get&amp;lt;0&amp;gt;(t) &amp;lt; get&amp;lt;0&amp;gt;(u)) || (!(bool)(get&amp;lt;0&amp;gt;(u) &amp;lt; get&amp;lt;0&amp;gt;(t)) &amp;amp;&amp;amp; t tail &amp;lt; u tail ), where&lt;br /&gt;
+r tail for some tuple r is a tuple containing all but the first element of r. For any two zero-length tuples&lt;br /&gt;
+e and f, e &amp;lt; f returns false.&lt;br /&gt;
+~~~&lt;br /&gt;
+The result is defined as:&lt;br /&gt;
+==(bool)(get&amp;lt;0&amp;gt;(t) &amp;lt; get&amp;lt;0&amp;gt;(u)) || (!(bool)(get&amp;lt;0&amp;gt;(u) &amp;lt; get&amp;lt;0&amp;gt;(t)) &amp;amp;&amp;amp; t tail &amp;lt; u tail )==&lt;/p&gt;
+</description>
+        <pubDate>Sun, 27 Aug 2017 20:29:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/08/27/tuple-comparison.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/08/27/tuple-comparison.html</guid>
+        
+        <category>C++</category>
+        
+        <category>Standard</category>
+        
+        <category>Library</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Pair Comparison</title>
+        <description>&lt;p&gt;Sunday, 27. August 2017 09:08AM &lt;br /&gt;
+#Pair 之间的比较&lt;br /&gt;
+两个元素都相等，pair对象才被视为相等(equal):&lt;br /&gt;
+~~~&lt;br /&gt;
+namespace std {&lt;br /&gt;
+   template &amp;lt;typename T1, typename T2&amp;gt;&lt;br /&gt;
+   bool operator== (const pair&amp;lt;T1,T2&amp;gt;&amp;amp; x, const pair&amp;lt;T1,T2&amp;gt;&amp;amp; y) {&lt;br /&gt;
+       return x.first == y.first &amp;amp;&amp;amp; x.second == y.second;&lt;br /&gt;
+   }&lt;br /&gt;
+}&lt;br /&gt;
+~~~&lt;br /&gt;
+比较大小时，第一元素具有较高的优先级。如果两个pair的第一元素不相等，其比较结果就成为整个比较的结果。如果first相等，才继续比较second，并把比较结果当做整体结果:&lt;br /&gt;
+~~~&lt;br /&gt;
+namespace std {&lt;br /&gt;
+    template &amp;lt;typename T1, typename T2&amp;gt;&lt;br /&gt;
+    bool operator&amp;lt; (const pair&amp;lt;T1,T2&amp;gt;&amp;amp; x, const pair&amp;lt;T1,T2&amp;gt;&amp;amp; y) {&lt;br /&gt;
+        return x.first &amp;lt; y.first || &lt;br /&gt;
+               (!(y.first &amp;lt; x.frist) &amp;amp;&amp;amp; x.second &amp;lt; y.second);&lt;br /&gt;
+    }&lt;br /&gt;
+}&lt;br /&gt;
+~~~&lt;/p&gt;
+</description>
+        <pubDate>Sun, 27 Aug 2017 17:08:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/08/27/pair-comparison.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/08/27/pair-comparison.html</guid>
+        
+        <category>C++</category>
+        
+        <category>Standard</category>
+        
+        <category>Library</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Piecewise Construction</title>
+        <description>&lt;p&gt;Sunday, 27. August 2017 07:42AM &lt;br /&gt;
+#Piecewise Construction 逐块式构造&lt;/p&gt;
+
+&lt;p&gt;Class pair&amp;lt;&amp;gt; 提供三个构造函数，用以初始化first和second&lt;br /&gt;
+~~~&lt;br /&gt;
+namespace std {&lt;br /&gt;
+    template &amp;lt;typename T1, typename T2&amp;gt;&lt;br /&gt;
+    stuct pair {&lt;br /&gt;
+        …&lt;br /&gt;
+        pair(const T1&amp;amp; x, const T2&amp;amp; y);&lt;br /&gt;
+        template&amp;lt;typename U, typename V&amp;gt; pair(U&amp;amp;&amp;amp; x, V&amp;amp;&amp;amp; y);&lt;br /&gt;
+        template&amp;lt;typename… Args1, typename… Args&amp;gt;&lt;br /&gt;
+        pair(piecewise_construct_t, tuple&lt;args1...&gt; first_args, tuple&lt;args2...&gt; second_args);
+        ...
+    };
+}
+~~~
+第三个构造函数传递使用两个tuple分别将其元素传递first和second的构造函数去构造实例。为了强迫执行这样的行为， 你必须传递std::piecewise_construct作为额外的第一实参。
+==Example==
+~~~
+// util/pair1.cpp&lt;/args2...&gt;&lt;/args1...&gt;&lt;/p&gt;
+
+&lt;p&gt;#include &lt;iostream&gt;
+#include &lt;utility&gt;
+#include &lt;tuple&gt;
+using namespace std;&lt;/tuple&gt;&lt;/utility&gt;&lt;/iostream&gt;&lt;/p&gt;
+
+&lt;p&gt;class Foo {&lt;br /&gt;
+  public:&lt;br /&gt;
+    Foo (tuple&amp;lt;int,float&amp;gt;) {&lt;br /&gt;
+      cout«“Foo::Foo(tuple)”«endl;&lt;br /&gt;
+    }&lt;br /&gt;
+    template &lt;typename... args=&quot;&quot;&gt;
+    Foo (Args... args) {
+      cout&amp;lt;&amp;lt;&quot;Foo::Foo(args...)&quot;&amp;lt;&amp;lt;endl;
+    }
+};&lt;/typename...&gt;&lt;/p&gt;
+
+&lt;p&gt;int main() {&lt;br /&gt;
+    //create tuple t;&lt;br /&gt;
+    tuple&amp;lt;int,float&amp;gt; t(1, 2.22);&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//pass the tuple as a whole to the constructor of Foo:
+pair&amp;lt;int, Foo&amp;gt; p1(42,t);
+
+//pass the elements of tuple to the constructor of Foo;
+pair&amp;lt;int,Foo&amp;gt; p2 (piecewise_construct, make_tuple(42), t); } ~~~ 这个程序有以下输出 ~~~ Foo::Foo(tuple) Foo::Foo(args...) ~~~
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Sun, 27 Aug 2017 15:42:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/08/27/piecewise-construction.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/08/27/piecewise-construction.html</guid>
+        
+        <category>C++</category>
+        
+        <category>Standard</category>
+        
+        <category>Library</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Callable Object</title>
+        <description>&lt;p&gt;Saturday, 26. August 2017 08:40PM &lt;br /&gt;
+#Callable Objecgt(可被调用的对象)&lt;br /&gt;
+Callable Object可以是&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;函数&lt;/li&gt;
+  &lt;li&gt;指向成员函数的指针&lt;/li&gt;
+  &lt;li&gt;函数对象&lt;/li&gt;
+  &lt;li&gt;lambda,严格来说也是函数对象&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example:&lt;br /&gt;
+~~~&lt;br /&gt;
+void func (int x, int y);&lt;/p&gt;
+
+&lt;p&gt;auto l = [] () {&lt;br /&gt;
+          …&lt;br /&gt;
+	};&lt;/p&gt;
+
+&lt;p&gt;class C {&lt;br /&gt;
+  public:&lt;br /&gt;
+    void operator () (int x, int y) const;&lt;br /&gt;
+    void memfunc (int x, int y) const;&lt;br /&gt;
+};&lt;/p&gt;
+
+&lt;p&gt;int main() &lt;br /&gt;
+{&lt;br /&gt;
+    C c;&lt;br /&gt;
+    std::shared_ptr&lt;c&gt; sp(new C);&lt;/c&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;//bind() uses callable objects to bind arguments:
+std::bind(func,77,33)();
+std::bind(l,77,33)();
+std::bind(C(),77,33)();
+std::bind(&amp;amp;C::memfunc,c,77,33)();
+std::bind(&amp;amp;C::memfunc,sp,77,33)();
+
+//async() uses callable objects to start(background) tasks:
+std::async(func,42,77);
+std::async(l,42,77);
+std::async(c,42,77);
+std::async(&amp;amp;C::memfunc,&amp;amp;c,42,77);
+std::async(&amp;amp;C::memfunc,sp,42,77); } ~~~
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如果想声明callable object, 一般而言可使用class std::function&amp;lt;&amp;gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 27 Aug 2017 04:40:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/08/27/callable-object.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/08/27/callable-object.html</guid>
+        
+        <category>C++</category>
+        
+        <category>Standard</category>
+        
+        <category>Library</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Item 3: Understand decltype</title>
+        <description>&lt;p&gt;Tuesday, 22. August 2017 11:02AM &lt;br /&gt;
+#Item 3: Understand decltype&lt;br /&gt;
+#条目３： 理解decltype&lt;/p&gt;
+
+&lt;p&gt;##术语&amp;amp;概念&lt;br /&gt;
+- ###&lt;strong&gt;decltype&lt;/strong&gt;&lt;br /&gt;
+对于一个给定的名称或表达式，decltype会告诉你这个名称或表达式的类型。&lt;/p&gt;
+
+&lt;p&gt;##快速笔记&lt;br /&gt;
+1. 大多数情况下decltype会准确的给出你所预期的类型&lt;br /&gt;
+2. 在C++11中，decltype可能的主要用途就是在某种情况下用来声明函数模板的返回值，这里特指在这个函数的返回值类型取决于它的形参类型的情况下。&lt;br /&gt;
+	- trailing return type 语法&lt;br /&gt;
+	- C++14 的前置decltype语法&lt;br /&gt;
+	- 修订一：universal reference&lt;br /&gt;
+	- 修订二：perfect forward&lt;br /&gt;
+3. decltype制造“惊喜”的情况：当对名称以外的更复杂的东西使用decltype时，结果可能有点意外。比如decltype(x)和decltype((x))。&lt;/p&gt;
+
+&lt;p&gt;##例子&lt;br /&gt;
+==Example 1==&lt;br /&gt;
+这里的例子中decltype不出所料地，鹦鹉学舌般准确地回答了所给出的名字或是表达式的类型，没有制造意外。&lt;br /&gt;
+~~~&lt;br /&gt;
+count int i = 0; // decltype(i) is const int&lt;/p&gt;
+
+&lt;p&gt;bool f(const Widget&amp;amp; w); 	// decltype(w) is const Widget&amp;amp;&lt;br /&gt;
+				// decltype(f) is bool(const Widget&amp;amp;)&lt;/p&gt;
+
+&lt;p&gt;struct Point {&lt;br /&gt;
+  int x, y;		//decltype(Point::x) is int&lt;br /&gt;
+}; 			//decltype(Point::y) is int&lt;/p&gt;
+
+&lt;p&gt;Widget w;		//decltype(w) is Widget&lt;/p&gt;
+
+&lt;p&gt;if (f(w)) …		//decltype(f(w)) is bool&lt;/p&gt;
+
+&lt;p&gt;template&lt;typename t=&quot;&quot;&gt;
+class vector {
+public:
+  ...
+  T&amp;amp; operator[](std::size_t index);
+  ...
+};&lt;/typename&gt;&lt;/p&gt;
+
+&lt;p&gt;vector&lt;int&gt; v;		//decltype(v) is vector&lt;int&gt;
+...
+if (v[0] == 0) ...	//decltype(v[0]) is int&amp;amp;
+~~~&lt;/int&gt;&lt;/int&gt;&lt;/p&gt;
+
+&lt;p&gt;==Example 2==&lt;br /&gt;
+下面来看decltype如何运用于声明函数模板。需要注意的是这种实现可以工作但是还能做一些&lt;strong&gt;改进&lt;/strong&gt;，此处先按下不表。&lt;br /&gt;
+~~~&lt;br /&gt;
+template&amp;lt;typename Container, typename Index&amp;gt;	// works, but&lt;br /&gt;
+auto authAndAccess(Container&amp;amp; c, Index i) 	// requires&lt;br /&gt;
+-&amp;gt; decltype(c[i])				// refinement&lt;br /&gt;
+{&lt;br /&gt;
+  authenticateUser();&lt;br /&gt;
+  return c[i];&lt;br /&gt;
+}&lt;br /&gt;
+~~~&lt;br /&gt;
+这里auto类型指示符（type-specifier）并没有做什么与类型推断相关的事情。它其实指明了C++11的&lt;em&gt;后置返回类型&lt;/em&gt;（trailing return type）语法在此处被使用。&lt;br /&gt;
+这种语法的好处是你可以使用形参列表里的参数来表达自己让编译器推断的类型，以往的前置返回值无法获知形参，因为那个时候形参们尚未被声明。&lt;br /&gt;
+此种情况中在C++11 中必须要写上这种特殊语法，但是在C++14中，这样的后置语法可以忽略，编译器会自动去推断return 之后的表达式的类型作为返回类型。例子如下，同时要注意如下的例子其实并不正确。&lt;br /&gt;
+~~~&lt;br /&gt;
+templates &amp;lt;typename Container, typename Index&amp;gt;	//C++14&lt;br /&gt;
+auto authAndAccess(Container&amp;amp; c, Index i)	//not quite &lt;br /&gt;
+{						//correct&lt;br /&gt;
+  authenticateUser();&lt;br /&gt;
+  return c[i];			//return type deduced from c[i]&lt;br /&gt;
+}	&lt;br /&gt;
+~~~&lt;br /&gt;
+条目2向我们解释了对于函数的auto返回类型推断实际上使用了模板类型推断。在这个例子里等价的模板推断如下(仅笔者理解，待考)，下述例子中T的推断结果便是上面这个片段里的返回类型推断结果。&lt;br /&gt;
+~~~&lt;br /&gt;
+template &lt;typename t=&quot;&quot;&gt;
+void fun_for_authAndAccess(T param);&lt;/typename&gt;&lt;/p&gt;
+
+&lt;p&gt;std::deque&lt;int&gt; d;
+...
+func_for_authAndAccess(d[5]);	//func_for_authAndAccess(expr)
+~~~
+如果是这样的形式，我们发现其对应条目1中所介绍的模板类型推断的第三种情况。即&lt;/int&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Case 3: 当paramType既不是指针也不是引用时&lt;/strong&gt;，&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;如果实参expr的类型是reference，忽略reference的部分。&lt;/li&gt;
+  &lt;li&gt;如果忽略reference之后还有const，一并忽略。volatile也忽略。最后将expr与paramType匹配。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;根据上述诀窍我们来看看这个例子中T的推断结果： d[5]的类型是int&amp;amp;, 忽略掉该忽略的部分以后还剩下int，paramType的类型是T，因此T的类型被推断为int。这种结果在我们这里例子中是会带来问题的。int作为一个函数的返回类型是一个右值(rvalue)。也意味着以下代码编译无法通过，&lt;br /&gt;
+~~~&lt;br /&gt;
+std::deque&lt;int&gt; d;
+...
+authAndAccess(d,5) = 10; 	// authenticate user, return d[5]
+				// then assgin 10 to it;
+				//this won&#39;t compile!
+~~~
+为了使authAndAccess如我们预想的那样工作，这里还需要对它的返回类型作decltype类型推断。像这样，
+~~~
+template&amp;lt;typename Container, typename Index&amp;gt;	// C++14; works,
+decltype(auto)					// but still
+authAndAccess(Container&amp;amp; c, Index i)		// requires
+{						// refinement
+  authenticateUser();
+  return c[i];
+}
+~~~
+现在authAndAccess就真的会和c[i]返回一样的东西。
+decltype(auto)这种用法不局限于函数返回类型也能用于变量声明。比如像这样应用于初始化表达式。
+~~~
+Widget w;&lt;/int&gt;&lt;/p&gt;
+
+&lt;p&gt;const Widget&amp;amp; cw = w;&lt;/p&gt;
+
+&lt;p&gt;auto myWidget1 = cw;	// auto type deduction&lt;br /&gt;
+			// myWidget1’s type is Widget&lt;/p&gt;
+
+&lt;p&gt;decltype(auto) myWidget2 = cw;	// decltype type deduction;&lt;br /&gt;
+				// myWidget2’s type is &lt;br /&gt;
+				// const Widget&amp;amp;&lt;br /&gt;
+~~~&lt;br /&gt;
+接下来我们讲讲之前提到的这个函数模板的&lt;strong&gt;改进&lt;/strong&gt;问题。&lt;br /&gt;
+####修订一：universal reference&lt;br /&gt;
+来观察C++14版的authAndAccess声明&lt;br /&gt;
+~~~&lt;br /&gt;
+template&amp;lt;typename Container, typename Index&amp;gt;&lt;br /&gt;
+decltype(auto) authAndAccess(Container&amp;amp; c, Index i);&lt;br /&gt;
+~~~&lt;br /&gt;
+我们可以发现只有容器的非const左值引用(lvalue-reference-to-non-const)可以被传为第一参数。&lt;br /&gt;
+右值(rvalue)并不能作为这里的参数。&lt;br /&gt;
+不可否认的是，给authAndAccess传递右值容器是一种极端情况。因为右值容器是一个临时对象，通常会在包含authAndAccess调用的语句结束时就被销毁，同时意味着对这个容器内某个元素的引用也会被悬空。&lt;br /&gt;
+但是如果说用户仅仅是想利用到这个临时容器的某个元素的拷贝也是说得通的。举个例子：&lt;br /&gt;
+~~~&lt;br /&gt;
+std::deque&lt;std::string&gt; makeStringDeque();	// factory function&lt;/std::string&gt;&lt;/p&gt;
+
+&lt;p&gt;// make copy of 5th element of deque returned&lt;br /&gt;
+// from makeStringDeque&lt;br /&gt;
+auto s = authAndAccess(makeStringDeque(),5);&lt;br /&gt;
+~~~&lt;br /&gt;
+为了支持这样的使用方式意味要改进authAndAccess的声明使得可以同时处理lvalue和rvalue。Overloading是一个选择，但是我们需要维护两个函数，一个以lvalue reference为形参，另一个以rvalue reference为形参。&lt;br /&gt;
+避免这个问题的方法是：使用universal reference。我们可以作如下的函数模板声明&lt;br /&gt;
+~~~&lt;br /&gt;
+template&amp;lt;typename Container, typename Index&amp;gt;  //c is now  &lt;br /&gt;
+decltype(auto) authAndAccess(Container&amp;amp;&amp;amp; c, Index i);	  // universal reference&lt;br /&gt;
+~~~&lt;br /&gt;
+注意到这里对Index这个类型未知的对象使用了按值传参(pass-by-value). 通常按值传参存在三个风险：&lt;br /&gt;
+- 不必要的对象拷贝导致性能(performance)上的忧虑&lt;br /&gt;
+- 存在发生对象剪切（object slicing）（见Item 41）的风险。&lt;br /&gt;
+- 来自同侪的嘲讽(derision)&lt;br /&gt;
+但是就这个具体问题（一个容器的索引）而言，沿用标准库的做法(eg. operator[] for std::string, std::vector, std::deque)看起来是合理的。所以我们这里对索引坚持使用了pass-by-value.&lt;/p&gt;
+
+&lt;p&gt;####修订二： perfect forward&lt;br /&gt;
+然而，根据Item 25给我们的告诫：为universal reference使用std::forward&lt;br /&gt;
+我们仍需做出以下改进&lt;br /&gt;
+~~~&lt;br /&gt;
+template&amp;lt;typename Container, typename Index&amp;gt;  // final C++14 version&lt;br /&gt;
+decltype(auto)	&lt;br /&gt;
+authAndAccess(Container&amp;amp;&amp;amp; c, Index i)&lt;br /&gt;
+{&lt;br /&gt;
+  authenticateUser();&lt;br /&gt;
+  return std::forward&lt;container&gt;(c)[i];
+}
+~~~
+如果没有一个能支持C++14的编译器，那么就采用如下等价写法。
+~~~
+template&amp;lt;typename Container, typename Index&amp;gt; // final C++11 version
+auto
+authAndAccess(Container&amp;amp;&amp;amp; c, Index i)
+-&amp;gt; decltype(std::forward&lt;container&gt;(c)[i])
+{
+  authenticateUser();
+  return std::forward&lt;container&gt;(c)[i];
+}
+~~~&lt;/container&gt;&lt;/container&gt;&lt;/container&gt;&lt;/p&gt;
+
+&lt;p&gt;==Example 3==&lt;br /&gt;
+decltype&lt;strong&gt;几乎&lt;/strong&gt;总是能产生你所预期的类型,少数情况下会制造“惊喜”。说实话，你不太可能碰到这些规律的例外情况，除非你是个负有重大责任(heavy-duty)的库实现者。&lt;br /&gt;
+要完全理解掌握decltype的行为，你不得不使自己熟悉极少的特例。大多数的特例过于晦涩，我们按下不表。但是我们可以来看一个例子来更深入了解一下decltype和它的用法。&lt;br /&gt;
+~~~&lt;br /&gt;
+int x = 0;&lt;br /&gt;
+~~~&lt;br /&gt;
+&lt;code&gt;x&lt;/code&gt;是一个变量的名称，所以&lt;code&gt;decltype(x)&lt;/code&gt;是int, 但是如果将&lt;code&gt;x&lt;/code&gt;用括号包裹起来变成&lt;code&gt;(x)&lt;/code&gt;,产生了一个比单纯名称要复杂一点表达式时，情况有所不同。作为一个名称，&lt;code&gt;x&lt;/code&gt;是一个左值（lvalue），而且C++也将表达式&lt;code&gt;(x)&lt;/code&gt;定义为左值。因此&lt;code&gt;decltype((x))&lt;/code&gt;的结果是&lt;code&gt;int&amp;amp;&lt;/code&gt; 。&lt;br /&gt;
+在C++11中， 这个现象只是一个令人好奇的小玩意。但是在结合和C++14的&lt;code&gt;decltype(auto)&lt;/code&gt;的语法之后，这意味着你对return语句进行一个看似无关紧要的改动也能影响到函数返回值的类型推断结果。见下例&lt;br /&gt;
+~~~&lt;br /&gt;
+decltype(auto) f1()&lt;br /&gt;
+{&lt;br /&gt;
+  int x = 0;&lt;br /&gt;
+  …&lt;br /&gt;
+  return x;	//decltype(x) is int, so f1 returns int&lt;br /&gt;
+}&lt;/p&gt;
+
+&lt;p&gt;decltype(auto) f2()&lt;br /&gt;
+{&lt;br /&gt;
+  int x = 0;&lt;br /&gt;
+  …&lt;br /&gt;
+  return (x);	//decltype((x)) is int&amp;amp;, so f2 returns int&amp;amp;&lt;br /&gt;
+}&lt;br /&gt;
+~~~&lt;br /&gt;
+要注意到这不仅是f2的返回类型和f1不同的问题。f2返回了一个局部变量的引用！像这样的代码将你丢到了名为未定义行为(undefined behavior)的特快列车上， 一辆你肯定不想上的列车。&lt;/p&gt;
+
+&lt;p&gt;重要的告诫就是，当你使用decltype(auto)的时候要非常当心。&lt;/p&gt;
+
+&lt;p&gt;##谨记要点&lt;br /&gt;
+- decltype&lt;strong&gt;几乎&lt;/strong&gt;总是不加改动地产生一个变量或是表达式的类型。&lt;br /&gt;
+- 对类型为T的，除了名称(name)以外的其他左值表达式(lvalue expression)，decltype总是报告一个&lt;code&gt;T&amp;amp;&lt;/code&gt;类型。&lt;br /&gt;
+- C++14支持&lt;code&gt;decltype(auto)&lt;/code&gt;语法。这就像auto一样，从初始化器推断一个类型，只不过它执行的是decltype的推断规则。（jtpan：去推断 declared type，而不是auto的规则：函数模板返回类型推断的规则）&lt;/p&gt;
+</description>
+        <pubDate>Tue, 22 Aug 2017 19:02:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/08/22/EMC++I03.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/08/22/EMC++I03.html</guid>
+        
+        <category>Effective</category>
+        
+        <category>Modern</category>
+        
+        <category>C++</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Item 9: Prefer alias declarations to typedefs.</title>
+        <description>&lt;p&gt;Sunday, 20. August 2017 05:44PM&lt;br /&gt;
+# Item 9: Prefer alias declarations to typedefs.&lt;br /&gt;
+# 条目9：宁愿使用alias declararion 替代 typedef&lt;/p&gt;
+
+&lt;h2 id=&quot;section&quot;&gt;术语&amp;amp;概念：&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;h3 id=&quot;typedef&quot;&gt;&lt;strong&gt;typedef&lt;/strong&gt;&lt;/h3&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example&lt;br /&gt;
+~~~c++&lt;br /&gt;
+typedef std::unique_ptr&amp;lt;std::unordered_map&amp;lt;std::string, std::string» UPtrMapSS;&lt;br /&gt;
+~~~&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;h3 id=&quot;alias-declaration&quot;&gt;&lt;strong&gt;alias declaration&lt;/strong&gt;&lt;/h3&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example&lt;br /&gt;
+~~~c++&lt;br /&gt;
+using UPtrMapSS = std:unique_ptr&amp;lt;std::unordered_map&amp;lt;std::string, std::string»;&lt;br /&gt;
+~~~&lt;br /&gt;
+## 快速笔记：&lt;br /&gt;
+### 至少有两种理由这样做，其中一种属于个人喜好的问题，另一种令人信服&lt;br /&gt;
+1. 当处理函数指针的时候，&lt;strong&gt;alias declaration&lt;/strong&gt; 形式更加自然可读&lt;br /&gt;
+2.  &lt;strong&gt;alias declaration&lt;/strong&gt; 特殊的地方在于它可以被模板化，但是&lt;strong&gt;typedef&lt;/strong&gt;不能。&lt;/p&gt;
+
+&lt;p&gt;==Example 1==&lt;br /&gt;
+~~~c++&lt;br /&gt;
+typedef void (*FP)(int, const std::string&amp;amp;); //typedef&lt;/p&gt;
+
+&lt;p&gt;using FP = void (*)(int, const std::string&amp;amp;); //alias declaration&lt;br /&gt;
+~~~&lt;/p&gt;
+
+&lt;p&gt;==Example 2==&lt;/p&gt;
+
+&lt;p&gt;考虑为拥有自定义分配器(allocator)的链表定义一个同名。注意这里的自定义分配器名为MyAlloc。Widget这里表示某一个用户定义的类。&lt;br /&gt;
+以下是&lt;strong&gt;alias declaration&lt;/strong&gt;的用法&lt;br /&gt;
+~~~c++&lt;br /&gt;
+template&lt;typenam t=&quot;&quot;&gt;
+using MyAllocList = std::list&amp;lt;T, MyAlloc&lt;t&gt;&amp;gt;;&lt;/t&gt;&lt;/typenam&gt;&lt;/p&gt;
+
+&lt;p&gt;MyAllocList&lt;widget&gt; lw; //client code
+~~~
+想要使用**typedef**达到类似的效果就需要写成如下的样子
+~~~c++
+template&lt;typenamef t=&quot;&quot;&gt;
+struct MyAllocList {
+  typedef std::list&amp;lt;T,MyAlloc&lt;t&gt;&amp;gt; type;
+};&lt;/t&gt;&lt;/typenamef&gt;&lt;/widget&gt;&lt;/p&gt;
+
+&lt;p&gt;MyAllocList&lt;widget&gt;::type lw; //client code
+~~~
+继续，当我们希望将上述那样一个链表用作某个模板类的成员时，事情会变得更加糟糕，
+实现将会是下面这个样子
+~~~c++
+template&lt;typename t=&quot;&quot;&gt;
+class Widget {
+private:
+  typename MyAllocList&lt;t&gt;::type list;
+};
+~~~
+注意到这里的type是一个有依赖的类型(dependent type), 如果某个模板中的类型声明中包含了模板参数T我们一般称呼这是个dependent type,这种类型之前一定要写上typename编译才能知道这里表达的是一个类型而不是别的什么东西, typename的这种用法请参考EC++。这里作简单说明。
+为什么这里的type叫做有依赖的类型呢,因为他具体是什么东西取决于依赖于T到底是什么。这个现象实质上是由模板的特化(specialization)引起的。
+考虑这样的情况，假设我们的MyAllocList存在如下的特化
+~~~c++
+class Wine { ... }
+template&amp;lt;&amp;gt;
+class MyAllocList&lt;wine&gt; {
+private:
+  enum class WineType
+  { White, Red, Rose };&lt;/wine&gt;&lt;/t&gt;&lt;/typename&gt;&lt;/widget&gt;&lt;/p&gt;
+
+&lt;p&gt;WineType type; //in this class, type is a data member!&lt;br /&gt;
+  …&lt;br /&gt;
+};&lt;br /&gt;
+~~~&lt;br /&gt;
+可以看到这种情况下type并不表示为一个类型。正是有这样的原因存在,当定义一个模板时, 所有在声明形式中嵌入了模板参数T的类型声明前必须加入typename修饰词以显式地告诉编译器这是个类型,然后编译器才能正常工作。&lt;/p&gt;
+
+&lt;p&gt;然后我们来看看&lt;strong&gt;alias declaration&lt;/strong&gt;在这种使用场景下的例子&lt;br /&gt;
+~~~c++&lt;br /&gt;
+template&lt;typename t=&quot;&quot;&gt;
+using MyAllocList = std::list&amp;lt;T, MyAlloc&lt;t&gt;&amp;gt;; //as before&lt;/t&gt;&lt;/typename&gt;&lt;/p&gt;
+
+&lt;p&gt;template&lt;typename t=&quot;&quot;&gt;
+class Widget {
+private:
+  MyAllocList&lt;t&gt; list; //no &quot;typename&quot;, no &quot;::type&quot;
+  ...
+};
+~~~
+这里编译器在看到MyAllocList就已经清楚得知道它是个同名模板，必定表达的是个类型。清晰明了。&lt;/t&gt;&lt;/typename&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;额外的例子&lt;/h3&gt;
+&lt;p&gt;当我们在进行模板元编程时(template metaprogramming, TMP), 一定会有改变模板形参T的类型的需求，比如去除const-或是reference-修饰词，或者是增加const-或是使其转变为左值引用(lvalue reference)。&lt;br /&gt;
+C++11在头文件&lt;type_traits&gt;中提供了一组模板工具来完成这些功能。它们都拥有
+~~~c++
+std::transformation&lt;t&gt;::type
+~~~
+这样的形式。&lt;/t&gt;&lt;/type_traits&gt;&lt;/p&gt;
+
+&lt;p&gt;==Example==&lt;br /&gt;
+~~~c++&lt;br /&gt;
+std::remove_const&lt;t&gt;::type  // yields T from const T
+std::remove_reference&lt;t&gt;::type // yields T from T&amp;amp; and T&amp;amp;&amp;amp;
+std::add_lvalue_reference&lt;t&gt;::type // yields T&amp;amp; from T
+~~~
+没错，由于一些历史原因，以上实现全部基于typedef。同样的功能，在C++14中提供了另一组形式为
+~~~c++
+std::transformation_t&lt;t&gt;
+~~~
+的实现。例子如下
+~~~c++
+std::remove_const&lt;t&gt;::type // C++11: const T -&amp;gt; T
+std::remove_const_t&lt;t&gt;	// C++14 equivalent&lt;/t&gt;&lt;/t&gt;&lt;/t&gt;&lt;/t&gt;&lt;/t&gt;&lt;/t&gt;&lt;/p&gt;
+
+&lt;p&gt;std::remove_reference&lt;t&gt;::type // C++11: T&amp;amp;/T&amp;amp;&amp;amp; -&amp;gt; T
+std::remove_reference_t&lt;t&gt;  // C++14 equivalent&lt;/t&gt;&lt;/t&gt;&lt;/p&gt;
+
+&lt;p&gt;std::add_lvalue_reference&lt;t&gt;::type // C++11: T -&amp;gt; T&amp;amp;
+std::add_lvalue_reference_t&lt;t&gt;	// C++14 equivalent
+~~~
+以下是C++14标准实现，即使当我们只能使用C++11，我们也可以很容易复制粘贴这样的实现。
+~~~c++
+template &lt;class t=&quot;&quot;&gt;
+using remove_const_t = typename remove_const&lt;t&gt;::type;&lt;/t&gt;&lt;/class&gt;&lt;/t&gt;&lt;/t&gt;&lt;/p&gt;
+
+&lt;p&gt;template &lt;class t=&quot;&quot;&gt;
+using remove_reference_t = typename remove_reference&lt;t&gt;::type;&lt;/t&gt;&lt;/class&gt;&lt;/p&gt;
+
+&lt;p&gt;template &lt;class t=&quot;&quot;&gt;
+using add_lvalue_reference_t = typename add_lvalue_reference&lt;t&gt;::type;
+~~~
+看，不能更简单了。&lt;/t&gt;&lt;/class&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;谨记要点&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;typedef不支持模板化，alias declaration支持。&lt;/li&gt;
+  &lt;li&gt;在模板中作类型声明时，alias declaration可以避免那些typedef总是需要的”::type”和”typename”&lt;/li&gt;
+  &lt;li&gt;C++11提供了类型特性(type traits)转化, C++14兼容前者的基础上又提供了所有的基于alias declaration实现的版本。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Mon, 21 Aug 2017 01:44:00 +0800</pubDate>
+        <link>http://jtpan.me/2017/08/21/EMC++I09.html</link>
+        <guid isPermaLink="true">http://jtpan.me/2017/08/21/EMC++I09.html</guid>
+        
+        <category>Effective</category>
+        
+        <category>Modern</category>
+        
+        <category>C++</category>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

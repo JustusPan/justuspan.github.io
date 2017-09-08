@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Item 3: Understand decltype</title>
+  <meta name="description" content="Tuesday, 22. August 2017 11:02AM #Item 3: Understand decltype#条目３： 理解decltype">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://jtpan.me/2017/08/22/EMC++I03.html">
+  <link rel="alternate" type="application/rss+xml" title="Jtpan World" href="http://jtpan.me/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Jtpan World</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Item 3: Understand decltype</h1>
+    <p class="post-meta"><time datetime="2017-08-22T19:02:00+08:00" itemprop="datePublished">Aug 22, 2017</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">Jtpan</span></span></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>Tuesday, 22. August 2017 11:02AM <br />
+#Item 3: Understand decltype<br />
+#条目３： 理解decltype</p>
+
+<p>##术语&amp;概念<br />
+- ###<strong>decltype</strong><br />
+对于一个给定的名称或表达式，decltype会告诉你这个名称或表达式的类型。</p>
+
+<p>##快速笔记<br />
+1. 大多数情况下decltype会准确的给出你所预期的类型<br />
+2. 在C++11中，decltype可能的主要用途就是在某种情况下用来声明函数模板的返回值，这里特指在这个函数的返回值类型取决于它的形参类型的情况下。<br />
+	- trailing return type 语法<br />
+	- C++14 的前置decltype语法<br />
+	- 修订一：universal reference<br />
+	- 修订二：perfect forward<br />
+3. decltype制造“惊喜”的情况：当对名称以外的更复杂的东西使用decltype时，结果可能有点意外。比如decltype(x)和decltype((x))。</p>
+
+<p>##例子<br />
+==Example 1==<br />
+这里的例子中decltype不出所料地，鹦鹉学舌般准确地回答了所给出的名字或是表达式的类型，没有制造意外。<br />
+~~~<br />
+count int i = 0; // decltype(i) is const int</p>
+
+<p>bool f(const Widget&amp; w); 	// decltype(w) is const Widget&amp;<br />
+				// decltype(f) is bool(const Widget&amp;)</p>
+
+<p>struct Point {<br />
+  int x, y;		//decltype(Point::x) is int<br />
+}; 			//decltype(Point::y) is int</p>
+
+<p>Widget w;		//decltype(w) is Widget</p>
+
+<p>if (f(w)) …		//decltype(f(w)) is bool</p>
+
+<p>template<typename t="">
+class vector {
+public:
+  ...
+  T&amp; operator[](std::size_t index);
+  ...
+};</typename></p>
+
+<p>vector<int> v;		//decltype(v) is vector<int>
+...
+if (v[0] == 0) ...	//decltype(v[0]) is int&amp;
+~~~</int></int></p>
+
+<p>==Example 2==<br />
+下面来看decltype如何运用于声明函数模板。需要注意的是这种实现可以工作但是还能做一些<strong>改进</strong>，此处先按下不表。<br />
+~~~<br />
+template&lt;typename Container, typename Index&gt;	// works, but<br />
+auto authAndAccess(Container&amp; c, Index i) 	// requires<br />
+-&gt; decltype(c[i])				// refinement<br />
+{<br />
+  authenticateUser();<br />
+  return c[i];<br />
+}<br />
+~~~<br />
+这里auto类型指示符（type-specifier）并没有做什么与类型推断相关的事情。它其实指明了C++11的<em>后置返回类型</em>（trailing return type）语法在此处被使用。<br />
+这种语法的好处是你可以使用形参列表里的参数来表达自己让编译器推断的类型，以往的前置返回值无法获知形参，因为那个时候形参们尚未被声明。<br />
+此种情况中在C++11 中必须要写上这种特殊语法，但是在C++14中，这样的后置语法可以忽略，编译器会自动去推断return 之后的表达式的类型作为返回类型。例子如下，同时要注意如下的例子其实并不正确。<br />
+~~~<br />
+templates &lt;typename Container, typename Index&gt;	//C++14<br />
+auto authAndAccess(Container&amp; c, Index i)	//not quite <br />
+{						//correct<br />
+  authenticateUser();<br />
+  return c[i];			//return type deduced from c[i]<br />
+}	<br />
+~~~<br />
+条目2向我们解释了对于函数的auto返回类型推断实际上使用了模板类型推断。在这个例子里等价的模板推断如下(仅笔者理解，待考)，下述例子中T的推断结果便是上面这个片段里的返回类型推断结果。<br />
+~~~<br />
+template <typename t="">
+void fun_for_authAndAccess(T param);</typename></p>
+
+<p>std::deque<int> d;
+...
+func_for_authAndAccess(d[5]);	//func_for_authAndAccess(expr)
+~~~
+如果是这样的形式，我们发现其对应条目1中所介绍的模板类型推断的第三种情况。即</int></p>
+
+<p><strong>Case 3: 当paramType既不是指针也不是引用时</strong>，</p>
+
+<ul>
+  <li>如果实参expr的类型是reference，忽略reference的部分。</li>
+  <li>如果忽略reference之后还有const，一并忽略。volatile也忽略。最后将expr与paramType匹配。</li>
+</ul>
+
+<p>根据上述诀窍我们来看看这个例子中T的推断结果： d[5]的类型是int&amp;, 忽略掉该忽略的部分以后还剩下int，paramType的类型是T，因此T的类型被推断为int。这种结果在我们这里例子中是会带来问题的。int作为一个函数的返回类型是一个右值(rvalue)。也意味着以下代码编译无法通过，<br />
+~~~<br />
+std::deque<int> d;
+...
+authAndAccess(d,5) = 10; 	// authenticate user, return d[5]
+				// then assgin 10 to it;
+				//this won't compile!
+~~~
+为了使authAndAccess如我们预想的那样工作，这里还需要对它的返回类型作decltype类型推断。像这样，
+~~~
+template&lt;typename Container, typename Index&gt;	// C++14; works,
+decltype(auto)					// but still
+authAndAccess(Container&amp; c, Index i)		// requires
+{						// refinement
+  authenticateUser();
+  return c[i];
+}
+~~~
+现在authAndAccess就真的会和c[i]返回一样的东西。
+decltype(auto)这种用法不局限于函数返回类型也能用于变量声明。比如像这样应用于初始化表达式。
+~~~
+Widget w;</int></p>
+
+<p>const Widget&amp; cw = w;</p>
+
+<p>auto myWidget1 = cw;	// auto type deduction<br />
+			// myWidget1’s type is Widget</p>
+
+<p>decltype(auto) myWidget2 = cw;	// decltype type deduction;<br />
+				// myWidget2’s type is <br />
+				// const Widget&amp;<br />
+~~~<br />
+接下来我们讲讲之前提到的这个函数模板的<strong>改进</strong>问题。<br />
+####修订一：universal reference<br />
+来观察C++14版的authAndAccess声明<br />
+~~~<br />
+template&lt;typename Container, typename Index&gt;<br />
+decltype(auto) authAndAccess(Container&amp; c, Index i);<br />
+~~~<br />
+我们可以发现只有容器的非const左值引用(lvalue-reference-to-non-const)可以被传为第一参数。<br />
+右值(rvalue)并不能作为这里的参数。<br />
+不可否认的是，给authAndAccess传递右值容器是一种极端情况。因为右值容器是一个临时对象，通常会在包含authAndAccess调用的语句结束时就被销毁，同时意味着对这个容器内某个元素的引用也会被悬空。<br />
+但是如果说用户仅仅是想利用到这个临时容器的某个元素的拷贝也是说得通的。举个例子：<br />
+~~~<br />
+std::deque<std::string> makeStringDeque();	// factory function</std::string></p>
+
+<p>// make copy of 5th element of deque returned<br />
+// from makeStringDeque<br />
+auto s = authAndAccess(makeStringDeque(),5);<br />
+~~~<br />
+为了支持这样的使用方式意味要改进authAndAccess的声明使得可以同时处理lvalue和rvalue。Overloading是一个选择，但是我们需要维护两个函数，一个以lvalue reference为形参，另一个以rvalue reference为形参。<br />
+避免这个问题的方法是：使用universal reference。我们可以作如下的函数模板声明<br />
+~~~<br />
+template&lt;typename Container, typename Index&gt;  //c is now  <br />
+decltype(auto) authAndAccess(Container&amp;&amp; c, Index i);	  // universal reference<br />
+~~~<br />
+注意到这里对Index这个类型未知的对象使用了按值传参(pass-by-value). 通常按值传参存在三个风险：<br />
+- 不必要的对象拷贝导致性能(performance)上的忧虑<br />
+- 存在发生对象剪切（object slicing）（见Item 41）的风险。<br />
+- 来自同侪的嘲讽(derision)<br />
+但是就这个具体问题（一个容器的索引）而言，沿用标准库的做法(eg. operator[] for std::string, std::vector, std::deque)看起来是合理的。所以我们这里对索引坚持使用了pass-by-value.</p>
+
+<p>####修订二： perfect forward<br />
+然而，根据Item 25给我们的告诫：为universal reference使用std::forward<br />
+我们仍需做出以下改进<br />
+~~~<br />
+template&lt;typename Container, typename Index&gt;  // final C++14 version<br />
+decltype(auto)	<br />
+authAndAccess(Container&amp;&amp; c, Index i)<br />
+{<br />
+  authenticateUser();<br />
+  return std::forward<container>(c)[i];
+}
+~~~
+如果没有一个能支持C++14的编译器，那么就采用如下等价写法。
+~~~
+template&lt;typename Container, typename Index&gt; // final C++11 version
+auto
+authAndAccess(Container&amp;&amp; c, Index i)
+-&gt; decltype(std::forward<container>(c)[i])
+{
+  authenticateUser();
+  return std::forward<container>(c)[i];
+}
+~~~</container></container></container></p>
+
+<p>==Example 3==<br />
+decltype<strong>几乎</strong>总是能产生你所预期的类型,少数情况下会制造“惊喜”。说实话，你不太可能碰到这些规律的例外情况，除非你是个负有重大责任(heavy-duty)的库实现者。<br />
+要完全理解掌握decltype的行为，你不得不使自己熟悉极少的特例。大多数的特例过于晦涩，我们按下不表。但是我们可以来看一个例子来更深入了解一下decltype和它的用法。<br />
+~~~<br />
+int x = 0;<br />
+~~~<br />
+<code>x</code>是一个变量的名称，所以<code>decltype(x)</code>是int, 但是如果将<code>x</code>用括号包裹起来变成<code>(x)</code>,产生了一个比单纯名称要复杂一点表达式时，情况有所不同。作为一个名称，<code>x</code>是一个左值（lvalue），而且C++也将表达式<code>(x)</code>定义为左值。因此<code>decltype((x))</code>的结果是<code>int&amp;</code> 。<br />
+在C++11中， 这个现象只是一个令人好奇的小玩意。但是在结合和C++14的<code>decltype(auto)</code>的语法之后，这意味着你对return语句进行一个看似无关紧要的改动也能影响到函数返回值的类型推断结果。见下例<br />
+~~~<br />
+decltype(auto) f1()<br />
+{<br />
+  int x = 0;<br />
+  …<br />
+  return x;	//decltype(x) is int, so f1 returns int<br />
+}</p>
+
+<p>decltype(auto) f2()<br />
+{<br />
+  int x = 0;<br />
+  …<br />
+  return (x);	//decltype((x)) is int&amp;, so f2 returns int&amp;<br />
+}<br />
+~~~<br />
+要注意到这不仅是f2的返回类型和f1不同的问题。f2返回了一个局部变量的引用！像这样的代码将你丢到了名为未定义行为(undefined behavior)的特快列车上， 一辆你肯定不想上的列车。</p>
+
+<p>重要的告诫就是，当你使用decltype(auto)的时候要非常当心。</p>
+
+<p>##谨记要点<br />
+- decltype<strong>几乎</strong>总是不加改动地产生一个变量或是表达式的类型。<br />
+- 对类型为T的，除了名称(name)以外的其他左值表达式(lvalue expression)，decltype总是报告一个<code>T&amp;</code>类型。<br />
+- C++14支持<code>decltype(auto)</code>语法。这就像auto一样，从初始化器推断一个类型，只不过它执行的是decltype的推断规则。（jtpan：去推断 declared type，而不是auto的规则：函数模板返回类型推断的规则）</p>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li><a href="mailto:panjingtian@126.com">panjingtian@126.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/justuspan"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">justuspan</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Copyright &copy 2017 Jtpan. All rights reserved.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
